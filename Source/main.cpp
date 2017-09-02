@@ -9,78 +9,66 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#include "../Header/logger.hpp"
-#include "../Header/tracker.hpp"
-#include "../Header/argparse.hpp"
-#include "../Header/imageio.hpp"
+#include "../Header/Logging/logger.h"
+#include "../Header/ImageDetection/detectormarkerbased.h"
+#include "../Header/ImageDetection/camera.h"
+#include "../Header/Utilities/argparse.h"
+#include "../Header/Utilities/imageio.h"
+#include "../Header/Utilities/utils.h"
 
 const std::string LOGGING_NAME = "main.cpp";
+const std::string PROGRAM_NAME = "Markerbased Image Detection";
 
 int main(int argc, char *argv[])
 {
+  // Start program only if enough parameters are set
   if (argc > 1)
   {
     cv::Mat sourceImage,
-        targetImage;
+        markerImage;
     std::string out;
-    bool debug = getIsDebug();
     std::vector<std::string> arg(argv + 1, argv + argc);
 
-    if (!parseArg(--argc, arg, sourceImage, targetImage, debug, out))
+    // Parse all parameters and initialize corresponding variables
+    if (!parseArg(--argc, arg, markerImage) &&
+        !markerImage.empty() &&
+        initializeDetectorMarkerBased(markerImage))
     {
-      if (!targetImage.empty())
+      if (initializeCamera())
       {
-        cv::Mat result;
-        setIsDebug(debug);
-        initializeTracker(targetImage);
+        cv::Mat frame, result;
+        char key = 0;
 
-        if (!sourceImage.empty() && !out.empty())
-        { // Use only images
-          result = sourceImage.clone();
-          track(sourceImage, result);
-          saveImage(result, out);
-        }
-        else
-        { // Use camera
-          cv::VideoCapture camera(0);
-          if (camera.isOpened())
+        while (key != ESC)
+        {
+          if (getNextFrame(frame))
           {
-            camera.set(CV_CAP_PROP_FRAME_WIDTH, 1920);
-            camera.set(CV_CAP_PROP_FRAME_HEIGHT, 1020);
-            while (true)
-            {
-              cv::Mat cameraFrame;
-              camera.read(cameraFrame);
-              saveImage(cameraFrame, "source.jpg");
-              cv::cvtColor(cameraFrame, cameraFrame, cv::COLOR_BGR2GRAY);
-              result = cameraFrame.clone();
-              track(cameraFrame, result);
-              cv::imshow("cam", result);
+            //cv::Mat marker2 = cv::imread("./Images/marker2.png", CV_LOAD_IMAGE_GRAYSCALE);
+            //cv::Mat source2 = cv::imread("./Images/source2.png", CV_LOAD_IMAGE_GRAYSCALE);
 
-              // TODO umschreiben
-              char key = (char)cv::waitKey(30);
-              if (key == 27)
-                break;
-              if (key == 'a')
-                set(true);
-              if (key == 's')
-                set(false);
-            }
+            //processFrame(source2, marker2, result);
+            processFrame(frame, result);
+            cv::imshow(PROGRAM_NAME, result);
           }
           else
           {
-            logError(LOGGING_NAME, "Couldn't open camera.");
+            logWarn(LOGGING_NAME, "Frame of camera is empty.");
           }
+          key = cv::waitKey(1);
         }
       }
       else
       {
-        logError(LOGGING_NAME, "No target image definied.");
+        logError(LOGGING_NAME, "Couldn't initialize (default) camera.");
+        return -1;
       }
+
+      releaseCamera();
     }
     else
     {
-      logError(LOGGING_NAME, "Couldn't parse arguments.");
+      logError(LOGGING_NAME, "Couldn't parse arguments. Some must be invalid...");
+      return -1;
     }
   }
   else
