@@ -3,8 +3,8 @@
 
 #include <opencv2/core/core.hpp>
 
-#define CAMERA_WIDTH 1920
-#define CAMERA_HEIGHT 1020
+#define CAMERA_WIDTH 1280
+#define CAMERA_HEIGHT 720
 
 bool initializeCamera();
 bool getNextFrame(cv::Mat &frame);

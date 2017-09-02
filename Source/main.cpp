@@ -6,8 +6,8 @@
  * Author: Aykut Özdemir
  */
 #include <iostream>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
 #include "../Header/Logging/logger.h"
 #include "../Header/ImageDetection/detectormarkerbased.h"
@@ -15,10 +15,29 @@
 #include "../Header/Utilities/argparse.h"
 #include "../Header/Utilities/imageio.h"
 #include "../Header/Utilities/utils.h"
+#include "../Header/GUI/gui.h"
+
+#define WINDOW "Markerbased Image Detection"
 
 const std::string LOGGING_NAME = "main.cpp";
-const std::string PROGRAM_NAME = "Markerbased Image Detection";
 
+/**
+ *
+ */
+void computeFPS(int &frameCounter, const time_t &start, int &tick, int &fps)
+{
+  frameCounter++;
+  if ((time(0) - start) - tick >= 1)
+  {
+    tick++;
+    fps = frameCounter;
+    frameCounter = 0;
+  }
+}
+
+/**
+ *
+ */
 int main(int argc, char *argv[])
 {
   // Start program only if enough parameters are set
@@ -37,25 +56,31 @@ int main(int argc, char *argv[])
       if (initializeCamera())
       {
         cv::Mat frame, result;
+        Application app;
         char key = 0;
+        int frameCounter = 0, tick = 0, fps;
+        time_t start = time(0);
 
-        while (key != ESC)
+        cv::namedWindow(WINDOW, CV_WINDOW_AUTOSIZE);
+        initializeGUI(WINDOW, app);
+
+        do
         {
           if (getNextFrame(frame))
           {
-            //cv::Mat marker2 = cv::imread("./Images/marker2.png", CV_LOAD_IMAGE_GRAYSCALE);
-            //cv::Mat source2 = cv::imread("./Images/source2.png", CV_LOAD_IMAGE_GRAYSCALE);
-
-            //processFrame(source2, marker2, result);
-            processFrame(frame, result);
-            cv::imshow(PROGRAM_NAME, result);
+            frame.copyTo(result);
+            processFrame(frame, result, app);
+            GUI(result, app, fps);
+            cv::imshow(WINDOW, result);
+            key = (char)cv::waitKey(20);
           }
           else
           {
             logWarn(LOGGING_NAME, "Frame of camera is empty.");
           }
-          key = cv::waitKey(1);
-        }
+
+          computeFPS(frameCounter, start, tick, fps);
+        } while (key != ESC && key != _Q && key != _q);
       }
       else
       {

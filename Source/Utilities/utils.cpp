@@ -7,7 +7,6 @@
  */
 
 #include <iostream>
-#include <opencv2/gpu/gpu.hpp>
 
 #include "../../Header/Utilities/utils.h"
 
@@ -170,4 +169,126 @@ cv::Mat rotate90deg(const cv::Mat &m, const bool &clockwise)
     cv::flip(t, f, clockwise ? 1 : 0);
 
     return f;
+}
+
+/**
+ *
+ */
+cv::Mat rotate90deg(const cv::Mat &m, const bool &clockwise, int count)
+{
+    if (!count) {
+        return m;
+    }
+    
+    cv::Mat t;
+
+    m.copyTo(t);
+    for (int i = 0; i < count; i++)
+    {
+        t = rotate90deg(t, clockwise);
+    }
+
+    return t;
+}
+
+/**
+ * 3 2
+ * 0 1
+ */
+std::vector<cv::Point> rotateQuad90deg(const std::vector<cv::Point> &m, const bool &clockwise)
+{
+    std::vector<cv::Point> t;
+
+    if (clockwise)
+    {
+        t.push_back(m[3]);
+        t.push_back(m[0]);
+        t.push_back(m[1]);
+        t.push_back(m[2]);
+    }
+    else
+    {
+        t.push_back(m[1]);
+        t.push_back(m[2]);
+        t.push_back(m[3]);
+        t.push_back(m[0]);
+    }
+
+    return t;
+}
+
+/**
+ * 3 2
+ * 0 1
+ */
+std::vector<cv::Point> rotateQuad90deg(const std::vector<cv::Point> &m, const bool &clockwise, int count)
+{
+    if (!count)
+    {
+        return m;
+    }
+
+    std::vector<cv::Point> t = {m[0], m[1], m[2], m[3]};
+
+    for (int i = 0; i < count; i++)
+    {
+        t = rotateQuad90deg(t, clockwise);
+    }
+
+    return t;
+}
+
+/**
+ * source: http://supp.iar.com/FilesPublic/SUPPORT/000419/AN-G-002.pdf
+ */
+unsigned int root(unsigned int x)
+{
+    unsigned int a, b;
+
+    b = x;
+    a = x = 0x3f;
+    x = b / x;
+    a = x = (x + a) >> 1;
+    x = b / x;
+    a = x = (x + a) >> 1;
+    x = b / x;
+    x = (x + a) >> 1;
+
+    return (x);
+}
+
+/**
+ *
+ */
+float distance(cv::Point a, cv::Point b)
+{
+    return cv::norm(a - b);
+}
+
+// --------------- Drawing Stuff ---------------
+
+/**
+ *
+ */
+void drawCornerDots(const std::vector<cv::Point> &polygon, cv::Mat &image)
+{
+    for (size_t i = 0; i < polygon.size(); i++)
+    {
+        if (i == 0)
+        {
+            cv::circle(image, polygon[i], 2, cv::Scalar(255, 0, 0), 2);
+        }
+        else if (i == 1)
+        {
+            cv::circle(image, polygon[i], 2, cv::Scalar(0, 255, 255), 2);
+        }
+        else if (i == 2)
+        {
+            cv::circle(image, polygon[i], 2, cv::Scalar(0, 0, 255), 2);
+        }
+        else
+        {
+            cv::circle(image, polygon[i], 2, cv::Scalar(0, 255, 0), 2);
+        }
+    }
 }

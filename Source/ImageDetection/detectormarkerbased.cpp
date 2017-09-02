@@ -13,7 +13,6 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #include "../../Header/ImageDetection/detectormarkerbased.h"
-#include "../../Header/Utilities/utils.h"
 #include "../../Header/Logging/logger.h"
 
 const std::string LOGGING_NAME = "detectormarkerbased.cpp";
@@ -34,7 +33,7 @@ cv::Mat computeBitMask(const cv::Mat &threshold)
         for (int x = 0; x < MARKER_BIT_SIZE; x++)
         {
             // Checks ob anzahl an weißen pixel mehr als die hälfte der pixels einen cells ist
-            if (cv::countNonZero(threshold(cv::Rect((x + 1) * cellSize, (y + 1) * cellSize, cellSize, cellSize))) > cellSize * cellSize / 2)
+            if (cv::countNonZero(threshold(cv::Rect((x + 1) * cellSize, (y + 1) * cellSize, cellSize, cellSize))) > cellSize * cellSize * 0.4f) // TODO % zahl über GUI
             {
                 mask.at<uchar>(y, x) = 1;
             }
@@ -153,9 +152,45 @@ float getShortestEdgeLength(const std::vector<cv::Point> &approxQuad)
 }
 
 /**
+ * Checks if two given polygons (vector<point>) have nearly the position. Every point must have a distance to each other,
+ * which is smaller than the given maximal distance.
+ * 
+ * @param polygon1 First polygon
+ * @param polygon2 Second polygon
+ * @return true, if both polygons have nearly the same position
+ */
+bool isApproxSamePolygon(std::vector<cv::Point> polygon1, std::vector<cv::Point> polygon2, float maxDist)
+{
+    bool b = true;
+
+    for (size_t i = 0; i < polygon1.size(); i++)
+    {
+        b = b && distance(polygon1[i], polygon2[i]) < maxDist;
+    }
+
+    return b;
+}
+
+/**
+ * Check
+ */
+bool approxQuadExists(std::vector<std::vector<cv::Point>> &detectedMarkers, std::vector<cv::Point> approxQuad)
+{
+    for (size_t i = 0; i < detectedMarkers.size(); i++)
+    {
+        if (isApproxSamePolygon(detectedMarkers[i], approxQuad, 20.0f))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  *
  */
-void findCandidates(const std::vector<std::vector<cv::Point>> &contours, std::vector<std::vector<cv::Point>> &detectedMarkers)
+void findCandidates(int minSideEdgeLength, const std::vector<std::vector<cv::Point>> &contours, std::vector<std::vector<cv::Point>> &detectedMarkers)
 {
     std::vector<cv::Point> approxQuad;
 
@@ -163,9 +198,11 @@ void findCandidates(const std::vector<std::vector<cv::Point>> &contours, std::ve
     {
         if (approximateQuad(contours[i], approxQuad))
         {
-            if (getShortestEdgeLength(approxQuad) > 15000.0) // TODO dynamic threshold
+            if (getShortestEdgeLength(approxQuad) > minSideEdgeLength)
             {
                 // Sort counter clockwise, if necessary
+                // 3 2
+                // 0 1
                 cv::Point p1 = approxQuad[1] - approxQuad[0];
                 cv::Point p2 = approxQuad[2] - approxQuad[0];
 
@@ -174,8 +211,10 @@ void findCandidates(const std::vector<std::vector<cv::Point>> &contours, std::ve
                     std::swap(approxQuad[1], approxQuad[3]);
                 }
 
-                // TODO hier noch die eigentlich doppelten entfernen, da ein quad mehrmals erkannt werden kann
-                detectedMarkers.push_back(approxQuad);
+                if (!approxQuadExists(detectedMarkers, approxQuad))
+                {
+                    detectedMarkers.push_back(approxQuad);
+                }
             }
         }
     }
@@ -189,7 +228,7 @@ void findCandidates(const std::vector<std::vector<cv::Point>> &contours, std::ve
  * @param marker Marker in frame
  * @return true, if id of markers bitmask is the same as the id of the default marker
  */
-bool isValidMarker(Marker marker)
+bool isValidMarker(Marker &marker)
 {
     unsigned int rotationCount = 0;
     cv::Mat bitMask = marker.bitMask;
@@ -210,7 +249,7 @@ bool isValidMarker(Marker marker)
     return false;
 }
 
-bool getValidMarkersInFrame(const cv::Mat &source, std::vector<Marker> &validMarkers)
+bool getValidMarkersInFrame(Application &app, const cv::Mat &source, cv::Mat &result, std::vector<Marker> &validMarkers)
 {
     cv::Mat grayscale, threshold;
     std::vector<std::vector<cv::Point>> contours, detectedQuads;
@@ -222,19 +261,16 @@ bool getValidMarkersInFrame(const cv::Mat &source, std::vector<Marker> &validMar
     cv::adaptiveThreshold(grayscale, threshold, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 7, 7);
 
     // Find existing contours
-    findContours(threshold, contours, 50); // TODO dynamic points, or constant
+    findContours(threshold, contours, app.minContourPointsAllowed);
 
     // Find only interesting contours (quads)
-    findCandidates(contours, detectedQuads);
+    findCandidates(app.minSideEdgeLength, contours, detectedQuads);
 
-    cv::Mat res;
-    source.copyTo(res);
-    drawContours(res, detectedQuads, -1, cv::Scalar(0, 255, 0), 1);
-    cv::imshow("Contours", res);
+    // Draw quads for testing purpose
+    drawContours(result, detectedQuads, -1, cv::Scalar(0, 255, 0), 1);
 
     if (detectedQuads.size() > 0)
     {
-        int i = 0;
         // Generate for every detected quad a valid marker
         for (std::vector<cv::Point> quad : detectedQuads)
         {
@@ -249,38 +285,41 @@ bool getValidMarkersInFrame(const cv::Mat &source, std::vector<Marker> &validMar
 
             // Compute bitmask and id of marker
             cv::Mat thresholdMarker;
-            cv::threshold(marker.image, thresholdMarker, 125, 255, cv::THRESH_OTSU);
+            cv::threshold(marker.image, thresholdMarker, 125, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
             // Valid marker (7x7, id is 5x5) must have a black border
             if (hasBlackBorder(thresholdMarker))
             {
-                marker.bitMask = computeBitMask(thresholdMarker); // no threshold because default marker is binary
+                marker.bitMask = computeBitMask(thresholdMarker);
 
                 if (isValidMarker(marker))
                 {
-                    cv::imshow("Valid Marker " + std::to_string(i), marker.image);
+                    // Rotate the marker positions so that every marker has the same origin orientation
+                    marker.points = rotateQuad90deg(quad, false, marker.rotationCount);
+
+                    // Draw circles at corners of marker for testing purpose
+                    drawCornerDots(marker.points, result);
+
                     validMarkers.push_back(marker);
+                    app.validMarkerCount++;
                 }
             }
-            i++;
         }
     }
 
-    std::cout << validMarkers.size() << std::endl;
     return validMarkers.size() > 0;
 }
 
 /**
  *
  */
-void processFrame(const cv::Mat &source, cv::Mat &result)
+void processFrame(const cv::Mat &source, cv::Mat &result, Application &app)
 {
     std::vector<Marker> markers;
 
-    if (getValidMarkersInFrame(source, markers))
-    {
-        std::cout << markers.size() << std::endl;
-    }
+    app.validMarkerCount = 0;
 
-    source.copyTo(result);
+    if (getValidMarkersInFrame(app, source, result, markers))
+    {
+    }
 }
