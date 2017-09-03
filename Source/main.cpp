@@ -24,6 +24,14 @@ const std::string LOGGING_NAME = "main.cpp";
 /**
  *
  */
+bool evalCameraCalibration()
+{
+  return false;
+}
+
+/**
+ *
+ */
 void computeFPS(int &frameCounter, const time_t &start, int &tick, int &fps)
 {
   frameCounter++;
@@ -50,10 +58,11 @@ int main(int argc, char *argv[])
 
     // Parse all parameters and initialize corresponding variables
     if (!parseArg(--argc, arg, markerImage) &&
-        !markerImage.empty() &&
-        initializeDetectorMarkerBased(markerImage))
+        !markerImage.empty())
     {
-      if (initializeCamera())
+      CameraCalibration cc;
+
+      if (initializeCamera(cc))
       {
         cv::Mat frame, result;
         Application app;
@@ -64,23 +73,31 @@ int main(int argc, char *argv[])
         cv::namedWindow(WINDOW, CV_WINDOW_AUTOSIZE);
         initializeGUI(WINDOW, app);
 
-        do
+        if (initializeDetectorMarkerBased(app, markerImage))
         {
-          if (getNextFrame(frame))
+          do
           {
-            frame.copyTo(result);
-            processFrame(frame, result, app);
-            GUI(result, app, fps);
-            cv::imshow(WINDOW, result);
-            key = (char)cv::waitKey(20);
-          }
-          else
-          {
-            logWarn(LOGGING_NAME, "Frame of camera is empty.");
-          }
+            if (getNextFrame(frame))
+            {
+              frame.copyTo(result);
+              processFrame(frame, result, app);
+              GUI(result, app, fps);
+              cv::imshow(WINDOW, result);
+              key = (char)cv::waitKey(20);
+            }
+            else
+            {
+              logWarn(LOGGING_NAME, "Frame of camera is empty.");
+            }
 
-          computeFPS(frameCounter, start, tick, fps);
-        } while (key != ESC && key != _Q && key != _q);
+            computeFPS(frameCounter, start, tick, fps);
+          } while (key != ESC && key != _Q && key != _q);
+        }
+        else
+        {
+          logError(LOGGING_NAME, "Couldn't initialize marker based detector.");
+          return -1;
+        }
       }
       else
       {

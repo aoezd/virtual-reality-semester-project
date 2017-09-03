@@ -9,8 +9,8 @@
 #include <iostream>
 #include <algorithm>
 #include <bitset>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
 #include "../../Header/ImageDetection/detectormarkerbased.h"
 #include "../../Header/Logging/logger.h"
@@ -18,12 +18,18 @@
 const std::string LOGGING_NAME = "detectormarkerbased.cpp";
 
 /** Actual marker which will be searched in the given camera frame */
+// TODO: MORE THAN ONE MARKER!!!!
 Marker defaultMarker;
 
 /**
- *
+ * Computes a 5x5 bit mask from a given threshold image (marker).
+ * A cell considered as white (1) if more than (percentage) pixels in the corresponding cell is non 0.
+ * 
+ * @param threshold     Marker image as a threshold image
+ * @param percentage    Percentage of non zero pixels to consider as 1/white
+ * @return 5x5 Bit mask
  */
-cv::Mat computeBitMask(const cv::Mat &threshold)
+cv::Mat computeBitMask(const cv::Mat &threshold, const float &percentage)
 {
     cv::Mat mask = cv::Mat::zeros(MARKER_BIT_SIZE, MARKER_BIT_SIZE, CV_8UC1);
     int cellSize = threshold.rows / (MARKER_BIT_SIZE + 2);
@@ -32,8 +38,7 @@ cv::Mat computeBitMask(const cv::Mat &threshold)
     {
         for (int x = 0; x < MARKER_BIT_SIZE; x++)
         {
-            // Checks ob anzahl an weißen pixel mehr als die hälfte der pixels einen cells ist
-            if (cv::countNonZero(threshold(cv::Rect((x + 1) * cellSize, (y + 1) * cellSize, cellSize, cellSize))) > cellSize * cellSize * 0.4f) // TODO % zahl über GUI
+            if (cv::countNonZero(threshold(cv::Rect((x + 1) * cellSize, (y + 1) * cellSize, cellSize, cellSize))) > cellSize * cellSize * percentage)
             {
                 mask.at<uchar>(y, x) = 1;
             }
@@ -44,9 +49,14 @@ cv::Mat computeBitMask(const cv::Mat &threshold)
 }
 
 /**
+ * Computes the information within a bit mask to an unsigned long long (uint64_t).
+ * Every row will be appose to one bit line and saved as a bitset.
+ * The ID now is the unsigned long long representation of the bitset.
  *
+ * @param bitMask   Bit mask which will be converted to an ID (unsigend long long), getting the information of
+ * @return Information data of bit mask, which will be used to compare marker
  */
-uint32_t computeId(const cv::Mat &bitMask)
+uint64_t computeId(const cv::Mat &bitMask)
 {
     std::bitset<64> bits;
     int k = 0;
@@ -63,9 +73,14 @@ uint32_t computeId(const cv::Mat &bitMask)
 }
 
 /**
+ * Checks if the given threshold image has a black border.
+ * If the count of white pixels in a computed cell area is bigger than (percentage), its not a black cell.
+ * Every border cell of the given threshold image must be black, to be considered as a marker.
  *
+ * @param percentage    Percentage of non zero pixels to consider as 1/white
+ * @return true, if every border cell is considered black
  */
-bool hasBlackBorder(const cv::Mat &threshold)
+bool hasBlackBorder(const cv::Mat &threshold, const float &percentage)
 {
     unsigned char borderBitSize = MARKER_BIT_SIZE + 2;
     int cellSize = threshold.rows / borderBitSize;
@@ -74,7 +89,7 @@ bool hasBlackBorder(const cv::Mat &threshold)
     {
         for (int x = 0; x < borderBitSize; x += ((y == 0 || y == borderBitSize - 1) ? 1 : borderBitSize - 1))
         {
-            if (cv::countNonZero(threshold(cv::Rect(x * cellSize, y * cellSize, cellSize, cellSize))) > cellSize * cellSize / 2)
+            if (cv::countNonZero(threshold(cv::Rect(x * cellSize, y * cellSize, cellSize, cellSize))) > cellSize * cellSize * (1.0f - percentage))
             {
                 return false;
             }
@@ -85,9 +100,14 @@ bool hasBlackBorder(const cv::Mat &threshold)
 }
 
 /**
+ * Initializes the marker detector with all markers which will be search in a given frame.
+ * The image of an marker must be a square.
  *
+ * @param markerImage   Image of marker
+ * @param app           Settings of application
+ * @return true, if initialization was successful
  */
-bool initializeDetectorMarkerBased(const cv::Mat &markerImage)
+bool initializeDetectorMarkerBased(const Application &app, const cv::Mat &markerImage)
 {
     if (markerImage.rows != markerImage.cols)
     {
@@ -96,15 +116,15 @@ bool initializeDetectorMarkerBased(const cv::Mat &markerImage)
     }
 
     defaultMarker.image = markerImage;
-    defaultMarker.bitMask = computeBitMask(markerImage); // no threshold because default marker is binary
+    defaultMarker.bitMask = computeBitMask(markerImage, app.percentageBitMask); // no threshold because default marker is binary
     defaultMarker.id = computeId(defaultMarker.bitMask);
     defaultMarker.rotationCount = 0;
 
-    return hasBlackBorder(markerImage);
+    return hasBlackBorder(markerImage, app.percentageBlackBorder);
 }
 
 /**
- *
+ * Finds contours in a given 
  */
 void findContours(const cv::Mat &thresholdImg, std::vector<std::vector<cv::Point>> &contours, unsigned int minContourPointsAllowed)
 {
@@ -123,7 +143,8 @@ void findContours(const cv::Mat &thresholdImg, std::vector<std::vector<cv::Point
 
 /**
  * Approximates a quad (actually "just" a polygon with 4 points, but interesting image areas are markers,
- * which are quads) from a given contour.
+ * which are quads) from a given contour (from many points -> 4 points).
+ * The approximated quad must be convex (a polygon without holes).
  * 
  * @param countour Polygon with many points.
  * @param approxQuad Approximated polygon with four points.
@@ -235,7 +256,7 @@ bool isValidMarker(Marker &marker)
 
     do
     {
-        uint32_t id = computeId(bitMask);
+        uint64_t id = computeId(bitMask);
         if (id == defaultMarker.id)
         {
             marker.rotationCount = rotationCount;
@@ -288,9 +309,9 @@ bool getValidMarkersInFrame(Application &app, const cv::Mat &source, cv::Mat &re
             cv::threshold(marker.image, thresholdMarker, 125, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
             // Valid marker (7x7, id is 5x5) must have a black border
-            if (hasBlackBorder(thresholdMarker))
+            if (hasBlackBorder(thresholdMarker, app.percentageBlackBorder))
             {
-                marker.bitMask = computeBitMask(thresholdMarker);
+                marker.bitMask = computeBitMask(thresholdMarker, app.percentageBitMask);
 
                 if (isValidMarker(marker))
                 {
@@ -299,6 +320,20 @@ bool getValidMarkersInFrame(Application &app, const cv::Mat &source, cv::Mat &re
 
                     // Draw circles at corners of marker for testing purpose
                     drawCornerDots(marker.points, result);
+
+                    /*
+ARUCO
+for (unsigned int i = 0; i < _corners.cols(); i++) {
+            cornerSubPix(grey, _corners.getMat(i),
+                         Size(params.cornerRefinementWinSize, params.cornerRefinementWinSize),
+                         Size(-1, -1), TermCriteria(TermCriteria::MAX_ITER | TermCriteria::EPS,
+                                                    params.cornerRefinementMaxIterations,
+                                                    params.cornerRefinementMinAccuracy));
+        }
+
+BUCH
+
+*/
 
                     validMarkers.push_back(marker);
                     app.validMarkerCount++;

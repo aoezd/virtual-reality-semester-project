@@ -12,14 +12,27 @@
 /**
   *
   */
-void initializeGUI(const cv::String &windowName, Application &app)
+void initializeGUI(const cv::String &windowName)
 {
     cvui::init(windowName, -1);
+}
+
+/**
+  *
+  */
+void initializeGUI(const cv::String &windowName, Application &app)
+{
+    initializeGUI(windowName);
     app.minContourPointsAllowed = 50;
     app.minSideEdgeLength = 5000;
     app.validMarkerCount = 0;
+    app.percentageBitMask = 0.4f;
+    app.percentageBlackBorder = 0.5f;
 }
 
+/**
+ *
+ */
 void GUI(cv::Mat &frame, Application &app, int fps)
 {
     // Main GUI frame
@@ -37,10 +50,30 @@ void GUI(cv::Mat &frame, Application &app, int fps)
     cvui::trackbar(150, &app.minSideEdgeLength, 1000, 30000);
     cvui::space(5);
 
+    // Computation bit mask
+    cvui::text("Bit mask % white pixels");
+    cvui::trackbar(150, &app.percentageBitMask, 0.01f, 1.0f);
+    cvui::space(5);
+
+    // Computation black border
+    cvui::text("Border % black pixels");
+    cvui::trackbar(150, &app.percentageBlackBorder, 0.01f, 1.0f);
+    cvui::space(5);
+
     // Valid marker count
     cvui::text("Found valid marker: " + std::to_string(app.validMarkerCount));
     cvui::space(5);
     cvui::endColumn();
 
+    cvui::update();
+}
+
+/**
+ *
+ */
+void GUICameraCalibration(cv::Mat &frame, bool foundPoints)
+{
+    cvui::text(frame, frame.rows * 0.5f, frame.cols * 0.5f, foundPoints ? "SPACE -> Take frame for camera calibration" : "No chessboard points found!", 0.7, foundPoints ? 0x00FF00 : 0xFF0000);
+    cvui::text(frame, frame.rows * 0.5f + 5, frame.cols * 0.5f, "ENTER -> Commit images", 0.7, 0x0000FF);
     cvui::update();
 }

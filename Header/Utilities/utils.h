@@ -14,6 +14,8 @@
 #include <opencv2/imgproc.hpp>
 
 #define ESC 27
+#define SPACE 32
+#define ENTER 13
 #define _q 113
 #define _Q 81
 
@@ -22,6 +24,8 @@ typedef struct
     int minContourPointsAllowed;
     int minSideEdgeLength;
     int validMarkerCount;
+    float percentageBitMask;
+    float percentageBlackBorder;
 } Application; // Defines settings of application
 
 // --------------- String Stuff ---------------
@@ -54,3 +58,23 @@ void drawCornerDots(const std::vector<cv::Point> &polygon, cv::Mat &image);
 
 #endif
 
+// TRASH
+// cv::imwrite("/home/aoez/Schreibtisch/source.jpg", source);
+// cv::imwrite("/home/aoez/Schreibtisch/DefaultMarker.jpg", defaultMarker.image);
+// cv::imwrite("/home/aoez/Schreibtisch/CurrentMarker.jpg", marker.image);
+// cv::imwrite("/home/aoez/Schreibtisch/CurrentMarkerThreshold.jpg", thresholdMarker);
+// std::cout << "hasBorder: " + std::to_string(hasBlackBorder(thresholdMarker)) << std::endl;
+// marker.bitMask = computeBitMask(thresholdMarker);
+// std::cout << "marker.bitMask: " << std::endl
+//           << marker.bitMask << std::endl;
+// std::cout << "isValidMarker: " + std::to_string(isValidMarker(marker)) << std::endl;
+// std::cout << "rotationCount: " + std::to_string(marker.rotationCount) << std::endl;
+// cv::imwrite("/home/aoez/Schreibtisch/result0.jpg", result);
+// std::cin.get();
+
+/**
+IDEEN für weitere Features
+
+http://www.morethantechnical.com/2010/11/10/20-lines-ar-in-opencv-wcode/
+
+*/

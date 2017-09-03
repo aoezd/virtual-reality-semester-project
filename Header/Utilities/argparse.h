@@ -12,7 +12,7 @@
 #include <vector>
 
 const std::string MARKER = "-m";
-const std::string MMARKER = "--marker";
+const std::string CAMERA_CALIBRATION = "-ccc";
 
 int parseArg(int argc, std::vector<std::string> argv, cv::Mat &markerImage);
 

@@ -1,7 +1,7 @@
 #ifndef __DETECTORMARKERBASED_H_
 #define __DETECTORMARKERBASED_H_
 
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 
 #include "../Utilities/utils.h"
 
@@ -17,7 +17,7 @@ typedef struct
     std::vector<cv::Point> points;
 } Marker; // Defines a marker which must be detected in a frame
 
-bool initializeDetectorMarkerBased(const cv::Mat &markerImage);
+bool initializeDetectorMarkerBased(const Application &app, const cv::Mat &markerImage);
 void processFrame(const cv::Mat &source, cv::Mat &result, Application &app);
 
 #endif

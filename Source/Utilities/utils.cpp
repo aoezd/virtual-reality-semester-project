@@ -176,10 +176,11 @@ cv::Mat rotate90deg(const cv::Mat &m, const bool &clockwise)
  */
 cv::Mat rotate90deg(const cv::Mat &m, const bool &clockwise, int count)
 {
-    if (!count) {
+    if (!count)
+    {
         return m;
     }
-    
+
     cv::Mat t;
 
     m.copyTo(t);
@@ -236,25 +237,6 @@ std::vector<cv::Point> rotateQuad90deg(const std::vector<cv::Point> &m, const bo
     }
 
     return t;
-}
-
-/**
- * source: http://supp.iar.com/FilesPublic/SUPPORT/000419/AN-G-002.pdf
- */
-unsigned int root(unsigned int x)
-{
-    unsigned int a, b;
-
-    b = x;
-    a = x = 0x3f;
-    x = b / x;
-    a = x = (x + a) >> 1;
-    x = b / x;
-    a = x = (x + a) >> 1;
-    x = b / x;
-    x = (x + a) >> 1;
-
-    return (x);
 }
 
 /**
