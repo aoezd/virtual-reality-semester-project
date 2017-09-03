@@ -11,6 +11,7 @@
 
 #include <opencv2/core/core.hpp>
 
+bool fileExists(const std::string &fileName);
 bool loadImage(cv::Mat & image, const std::string & filename);
 bool loadImages(std::vector<cv::Mat> &images, const std::string &filename);
 void saveImage(const cv::Mat & image, const std::string & filename);

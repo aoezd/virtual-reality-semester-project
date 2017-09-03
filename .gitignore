@@ -35,4 +35,8 @@
 *.app
 vr
 
+# Resources
+/Resources
+/Images/CameraCalibration
+
 .depend

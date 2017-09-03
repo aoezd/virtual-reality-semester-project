@@ -20,7 +20,7 @@ const std::string LOGGING_NAME = "argparse.cpp";
 /**
  *
  */
-int parseArg(int argc, std::vector<std::string> argv, cv::Mat &markerImage, std::vector<cv::Mat> calibrationImages)
+int parseArg(int argc, std::vector<std::string> argv, cv::Mat &markerImage, std::vector<cv::Mat> &calibrationImages, CameraCalibration &cc)
 {
     int i = 0;
 
@@ -37,16 +37,29 @@ int parseArg(int argc, std::vector<std::string> argv, cv::Mat &markerImage, std:
                 return 1;
             }
 
-            if (markerImage.rows != markerImage.cols) {
+            if (markerImage.rows != markerImage.cols)
+            {
                 logError(LOGGING_NAME, "Marker image must be a square.");
                 return 1;
             }
         }
 
         // -ccc
-        if (equal(param, CAMERA_CALIBRATION)) {
-            if (!loadImages(calibrationImages, argv.at(i + 1))) {
+        if (equal(param, CAMERA_CALIBRATION_COMPUTE))
+        {
+            if (!loadImages(calibrationImages, argv.at(i + 1)))
+            {
                 logError(LOGGING_NAME, "Couldn't load calibration images at path " + argv.at(i + 1) + ".");
+                return 1;
+            }
+        }
+
+        // -ccl
+        if (equal(param, CAMERA_CALIBRATION_LOAD))
+        {
+            if (!loadCameraCalibration(cc, argv.at(i + 1)))
+            {
+                logError(LOGGING_NAME, "Couldn't load camera calibration configuration at path " + argv.at(i + 1) + ".");
                 return 1;
             }
         }

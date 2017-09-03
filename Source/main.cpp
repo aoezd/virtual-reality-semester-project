@@ -54,15 +54,15 @@ int main(int argc, char *argv[])
     cv::Mat sourceImage,
         markerImage;
     std::string out;
+    std::vector<cv::Mat> calibrationImages;
     std::vector<std::string> arg(argv + 1, argv + argc);
+    CameraCalibration cc;
 
     // Parse all parameters and initialize corresponding variables
-    if (!parseArg(--argc, arg, markerImage) &&
+    if (!parseArg(--argc, arg, markerImage, calibrationImages, cc) &&
         !markerImage.empty())
     {
-      CameraCalibration cc;
-
-      if (initializeCamera(cc))
+      if (initializeCamera(cc, calibrationImages))
       {
         cv::Mat frame, result;
         Application app;
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
       }
       else
       {
-        logError(LOGGING_NAME, "Couldn't initialize (default) camera.");
+        logError(LOGGING_NAME, "Couldn't initialize (default) camera or calibrate it.");
         return -1;
       }
 

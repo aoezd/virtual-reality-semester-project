@@ -27,26 +27,27 @@ cv::VideoCapture camera(0);
 /**
  *
  */
-bool initializeCamera(CameraCalibration &cc)
+bool initializeCamera(CameraCalibration &cc, const std::vector<cv::Mat> &calibrationImages)
 {
     if (camera.isOpened())
     {
         camera.set(CV_CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH);
         camera.set(CV_CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT);
 
-        // Wenn keine ccc da ist
-        if ()
+        if (cc.cameraName.empty())
         {
-        }
-
-        // Wenn aus einem Ordner geladen werden soll
-        else if ()
-        {
-        }
-
-        // Default laden
-        else
-        {
+            if (calibrationImages.size() > 0)
+            {
+                return computeCameraCalibration(cc, calibrationImages);
+            }
+            else if (fileExists(DEFAULT_CC_FILEPATH + DEFAULT_CC_CAMERA_NAME + DEFAULT_CC_FILE_EXTENSION))
+            {
+                return loadCameraCalibration(cc, DEFAULT_CC_FILEPATH + DEFAULT_CC_CAMERA_NAME + DEFAULT_CC_FILE_EXTENSION);
+            }
+            else
+            {
+                return startCameraCalibration(cc);
+            }
         }
 
         return true;
@@ -77,6 +78,89 @@ void releaseCamera()
 }
 
 // --------------- Camera Calibration Stuff ---------------
+
+// aruco DrawAXIS
+// void drawAxis(InputOutputArray _image, InputArray _cameraMatrix, InputArray _distCoeffs,
+//     InputArray _rvec, InputArray _tvec, float length) {
+// CV_Assert(_image.getMat().total() != 0 &&
+// (_image.getMat().channels() == 1 || _image.getMat().channels() == 3));
+// CV_Assert(length > 0);
+
+// // project axis points
+// vector< Point3f > axisPoints;
+// axisPoints.push_back(Point3f(0, 0, 0));
+// axisPoints.push_back(Point3f(length, 0, 0));
+// axisPoints.push_back(Point3f(0, length, 0));
+// axisPoints.push_back(Point3f(0, 0, length));
+// vector< Point2f > imagePoints;
+// projectPoints(axisPoints, _rvec, _tvec, _cameraMatrix, _distCoeffs, imagePoints);
+
+// // draw axis lines
+// line(_image, imagePoints[0], imagePoints[1], Scalar(0, 0, 255), 3);
+// line(_image, imagePoints[0], imagePoints[2], Scalar(0, 255, 0), 3);
+// line(_image, imagePoints[0], imagePoints[3], Scalar(255, 0, 0), 3);
+// }
+
+/**
+ * Aruco
+ posetracker
+
+ bool MarkerPoseTracker::estimatePose(  Marker &m,const   CameraParameters &_cam_params,float _msize,float minerrorRatio){
+    
+    
+        if (_rvec.empty()){//if no previous data, use from scratch
+            cv::Mat rv,tv;
+            auto solutions=IPPE::solvePnP_(Marker::get3DPoints(_msize),m,_cam_params.CameraMatrix,_cam_params.Distorsion);
+            double errorRatio=solutions[1].second/solutions[0].second;
+            if (errorRatio<minerrorRatio) return false;//is te error ratio big enough
+            cv::solvePnP(Marker::get3DPoints(_msize),m,_cam_params.CameraMatrix,_cam_params.Distorsion,rv,tv);
+             rv.convertTo(_rvec,CV_32F);
+            tv.convertTo(_tvec,CV_32F);
+            impl__aruco_getRTfromMatrix44(solutions[0].first,rv,tv);
+         }
+        else{
+            cv::solvePnP(Marker::get3DPoints(_msize),m,_cam_params.CameraMatrix,_cam_params.Distorsion,_rvec,_tvec,true);
+    
+        }
+    
+        _rvec.copyTo(m.Rvec);
+        _tvec.copyTo(m.Tvec);
+        m.ssize=_msize;
+        return true;
+    }
+*/
+
+/**
+ * BUCH
+
+void estimatePosition(std::vector<Marker> &
+                          detectedMarkers)
+{
+    for (size_t i = 0; i < detectedMarkers.size(); i++)
+    {
+        Marker &m = detectedMarkers[i];
+        cv::Mat Rvec;
+        cv::Mat_<float> Tvec;
+        cv::Mat raux, taux;
+        cv::solvePnP(m_markerCorners3d, m.points, camMatrix,
+                     distCoeff, raux, taux);
+        raux.convertTo(Rvec, CV_32F);
+        taux.convertTo(Tvec, CV_32F);
+        cv::Mat_<float> rotMat(3, 3);
+        cv::Rodrigues(Rvec, rotMat);
+
+        m.transformation = Transformation();
+        for (int col = 0; col < 3; col++)
+        {
+            for (int row = 0; row < 3; row++)
+            {
+                m.transformation.r().mat[row][col] = rotMat(row, col);
+            }
+            m.transformation.t().data[col] = Tvec(col);
+        }
+        m.transformation = m.transformation.getInverted();
+    }
+} */
 
 /**
  * Computes the corners of the tiles in a chessboard pattern in real world points (cv::Point3f)
@@ -150,9 +234,24 @@ bool saveCameraCalibration(const CameraCalibration &cc, const std::string &fileP
 /**
  *
  */
+void calibrateCamera(CameraCalibration &cc, const std::vector<std::vector<cv::Point2f>> &chessboardImageSpacePoints)
+{
+    std::cout << "Compute camera calibration..." << std::endl;
+
+    std::vector<cv::Mat> rVec, tVec;
+    std::vector<std::vector<cv::Point3f>> worldSpaceCornerPoints(1);
+
+    createKnownBoardPosition(DEFAULT_CC_CHESSBOARD_SIZE, cc.chessboardRealTileEdgeLength, worldSpaceCornerPoints[0]);
+    worldSpaceCornerPoints.resize(chessboardImageSpacePoints.size(), worldSpaceCornerPoints[0]);
+    cv::calibrateCamera(worldSpaceCornerPoints, chessboardImageSpacePoints, DEFAULT_CC_CHESSBOARD_SIZE, cc.cameraMatrix, cc.distanceCoefficients, rVec, tVec);
+}
+
+/**
+ *
+ */
 bool startCameraCalibration(CameraCalibration &cc)
 {
-    std::cout << "Before we actually start calibrating the camera please print the chessboard pattern which is in the Images-folder(chessboard.png)." << std::endl;
+    std::cout << "Before we actually start calibrating the camera please print the chessboard pattern which is in the Images/CameraCalibration-folder(chessboard.png)." << std::endl;
     std::cout << "It will be needed for the further process." << std::endl;
     std::cout << "Starting live camera calibration..." << std::endl;
 
@@ -168,11 +267,11 @@ bool startCameraCalibration(CameraCalibration &cc)
     std::cout << "Please hold up the printed pattern in different angles in front of the camera." << std::endl;
     std::cout << "If the chessboard pattern was found in the current frame, you can press the SPACE-Button to take save the frame." << std::endl;
     std::cout << "A frame will only be saved if the chessboad pattern was found." << std::endl;
-    std::cout << "Please save at least 15 different images! Consider up to 50 images as recommended." << std::endl;
+    std::cout << "Please save at least 15 different images! The amount of 50 images is recommended." << std::endl;
     std::cout << "If you think you are ready, press the ENTER-Button to commit your images." << std::endl;
 
     char key;
-    cv::Mat frame;
+    cv::Mat frame, temp;
     std::vector<std::vector<cv::Point2f>> chessboardImageSpacePoints;
 
     cv::namedWindow(WINDOW, CV_WINDOW_AUTOSIZE);
@@ -189,6 +288,7 @@ bool startCameraCalibration(CameraCalibration &cc)
 
             if (foundPoints)
             {
+                frame.copyTo(temp);
                 cv::drawChessboardCorners(frame, DEFAULT_CC_CHESSBOARD_SIZE, points, foundPoints);
             }
 
@@ -201,11 +301,12 @@ bool startCameraCalibration(CameraCalibration &cc)
         }
 
         // Evaluate user input
-        key = (char)cv::waitKey(0);
+        key = (char)cv::waitKey(20);
         if (key == SPACE && foundPoints)
         {
             chessboardImageSpacePoints.push_back(points);
             std::cout << "-- Saved found image space points. Current count: " << chessboardImageSpacePoints.size() << std::endl;
+            saveImage(temp, "./Images/CameraCalibration/logitech_c525_hd_" + std::to_string(chessboardImageSpacePoints.size()) + ".jpg");
         }
         else if (key == ENTER)
         {
@@ -213,14 +314,7 @@ bool startCameraCalibration(CameraCalibration &cc)
         }
     }
 
-    std::cout << "Compute camera calibration..." << std::endl;
-
-    std::vector<cv::Mat> rVec, tVec;
-    std::vector<std::vector<cv::Point3f>> worldSpaceCornerPoints(1);
-
-    createKnownBoardPosition(DEFAULT_CC_CHESSBOARD_SIZE, cc.chessboardRealTileEdgeLength, worldSpaceCornerPoints[0]);
-    worldSpaceCornerPoints.resize(chessboardImageSpacePoints.size(), worldSpaceCornerPoints[0]);
-    cv::calibrateCamera(worldSpaceCornerPoints, chessboardImageSpacePoints, DEFAULT_CC_CHESSBOARD_SIZE, cc.cameraMatrix, cc.distanceCoefficients, rVec, tVec);
+    calibrateCamera(cc, chessboardImageSpacePoints);
 
     if (saveCameraCalibration(cc, DEFAULT_CC_FILEPATH + cc.cameraName + DEFAULT_CC_FILE_EXTENSION))
     {
@@ -234,54 +328,41 @@ bool startCameraCalibration(CameraCalibration &cc)
 /**
  *
  */
-bool computeCameraCalibration(CameraCalibration &cc, const std::string &dirPath)
+bool computeCameraCalibration(CameraCalibration &cc, const std::vector<cv::Mat> &images)
 {
-    std::vector<cv::Mat> images;
+    std::vector<std::vector<cv::Point2f>> chessboardImageSpacePoints;
 
-    if (loadImages(images, dirPath))
+    std::cout << "All images are successfully loaded." << std::endl;
+    std::cout << "Computing camera calibration from local images..." << std::endl;
+
+    std::cout << "Enter the name of your camera: ";
+    std::cin >> cc.cameraName;
+
+    std::cout << "Enter the length (in meters) of a chessboard tiles edge length: ";
+    std::cin >> cc.chessboardRealTileEdgeLength;
+
+    std::cout << "Enter the length (in meters) of a markers edge length: ";
+    std::cin >> cc.markerRealEdgeLength;
+
+    std::cout << "Searching chessboard corners for every image... " << std::endl;
+    for (size_t i = 0; i < images.size(); i++)
     {
-        std::vector<std::vector<cv::Point2f>> chessboardImageSpacePoints;
+        std::vector<cv::Point2f> points;
+        bool foundPoints = cv::findChessboardCorners(images[i], DEFAULT_CC_CHESSBOARD_SIZE, points, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE);
 
-        std::cout << "Computing camera calibration from local images..." << std::endl;
-
-        std::cout << "Enter the name of your camera: ";
-        std::cin >> cc.cameraName;
-
-        std::cout << "Enter the length (in meters) of a chessboard tiles edge length: ";
-        std::cin >> cc.chessboardRealTileEdgeLength;
-
-        std::cout << "Enter the length (in meters) of a markers edge length: ";
-        std::cin >> cc.markerRealEdgeLength;
-
-        for (int i = 0; i < images.size(); i++)
+        if (foundPoints)
         {
-            std::vector<cv::Point2f> points;
-            bool foundPoints = cv::findChessboardCorners(images[i], DEFAULT_CC_CHESSBOARD_SIZE, points, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE);
-
-            if (foundPoints)
-            {
-                chessboardImageSpacePoints.push_back(points);
-            }
-            else
-            {
-                std::cout << "Couldn't found points at image " << i << std::endl;
-            }
+            chessboardImageSpacePoints.push_back(points);
         }
-
-        // TODO vvl in eine extra Funktion packen
-        std::cout << "Compute camera calibration..." << std::endl;
-
-        std::vector<cv::Mat> rVec, tVec;
-        std::vector<std::vector<cv::Point3f>> worldSpaceCornerPoints(1);
-
-        createKnownBoardPosition(DEFAULT_CC_CHESSBOARD_SIZE, cc.chessboardRealTileEdgeLength, worldSpaceCornerPoints[0]);
-        worldSpaceCornerPoints.resize(chessboardImageSpacePoints.size(), worldSpaceCornerPoints[0]);
-        cv::calibrateCamera(worldSpaceCornerPoints, chessboardImageSpacePoints, DEFAULT_CC_CHESSBOARD_SIZE, cc.cameraMatrix, cc.distanceCoefficients, rVec, tVec);
-
-        return saveCameraCalibration(cc, DEFAULT_CC_FILEPATH + cc.cameraName + DEFAULT_CC_FILE_EXTENSION);
+        else
+        {
+            std::cout << "Couldn't found points at image " << i << std::endl;
+        }
     }
 
-    return false;
+    calibrateCamera(cc, chessboardImageSpacePoints);
+
+    return saveCameraCalibration(cc, DEFAULT_CC_FILEPATH + cc.cameraName + DEFAULT_CC_FILE_EXTENSION);
 }
 
 /**
@@ -337,3 +418,47 @@ bool loadCameraCalibration(CameraCalibration &cc, const std::string &filePath)
 
     return false;
 }
+
+/*
+static void _getSingleMarkerObjectPoints(float markerLength, OutputArray _objPoints) {
+
+    CV_Assert(markerLength > 0);
+
+    _objPoints.create(4, 1, CV_32FC3);
+    Mat objPoints = _objPoints.getMat();
+    // set coordinate system in the middle of the marker, with Z pointing out
+    objPoints.ptr< Vec3f >(0)[0] = Vec3f(-markerLength / 2.f, markerLength / 2.f, 0);
+    objPoints.ptr< Vec3f >(0)[1] = Vec3f(markerLength / 2.f, markerLength / 2.f, 0);
+    objPoints.ptr< Vec3f >(0)[2] = Vec3f(markerLength / 2.f, -markerLength / 2.f, 0);
+    objPoints.ptr< Vec3f >(0)[3] = Vec3f(-markerLength / 2.f, -markerLength / 2.f, 0);
+}
+
+void estimatePoseSingleMarkers(InputArrayOfArrays _corners, float markerLength,
+                               InputArray _cameraMatrix, InputArray _distCoeffs,
+                               OutputArray _rvecs, OutputArray _tvecs, OutputArray _objPoints) {
+
+    CV_Assert(markerLength > 0);
+
+    Mat markerObjPoints;
+    _getSingleMarkerObjectPoints(markerLength, markerObjPoints);
+    int nMarkers = (int)_corners.total();
+    _rvecs.create(nMarkers, 1, CV_64FC3);
+    _tvecs.create(nMarkers, 1, CV_64FC3);
+
+    Mat rvecs = _rvecs.getMat(), tvecs = _tvecs.getMat();
+
+    //// for each marker, calculate its pose
+    // for (int i = 0; i < nMarkers; i++) {
+    //    solvePnP(markerObjPoints, _corners.getMat(i), _cameraMatrix, _distCoeffs,
+    //             _rvecs.getMat(i), _tvecs.getMat(i));
+    //}
+
+    // this is the parallel call for the previous commented loop (result is equivalent)
+    parallel_for_(Range(0, nMarkers),
+                  SinglePoseEstimationParallel(markerObjPoints, _corners, _cameraMatrix,
+                                               _distCoeffs, rvecs, tvecs));
+    if(_objPoints.needed()){
+        markerObjPoints.convertTo(_objPoints, -1);
+    }
+}
+*/

@@ -91,10 +91,6 @@ bool loadImage(cv::Mat &image, const std::string &filename)
  */
 bool loadImages(std::vector<cv::Mat> &images, const std::string &dirPath)
 {
-
-    bool exists = dirExists(dirPath);
-    bool hasEntries = countEntriesInDir(dirPath) > 0;
-
     if (dirExists(dirPath) && countEntriesInDir(dirPath) > 0)
     {
         dirent *d;
@@ -104,16 +100,20 @@ bool loadImages(std::vector<cv::Mat> &images, const std::string &dirPath)
         {
             while ((d = readdir(dir)) != NULL)
             {
-                cv::Mat image;
                 std::string dcpp = d->d_name;
 
-                if (loadImage(image, dpp))
+                if (!equal(dcpp, "..") && !equal(dcpp, "."))
                 {
-                    images.push_back(image);
-                }
-                else
-                {
-                    logWarn(LOGGING_NAME, "Image at " + +" couldn't be loaded.");
+                    cv::Mat image;
+
+                    if (loadImage(image, dirPath + dcpp))
+                    {
+                        images.push_back(image);
+                    }
+                    else
+                    {
+                        logWarn(LOGGING_NAME, "Image at " + dcpp + " couldn't be loaded.");
+                    }
                 }
             }
 

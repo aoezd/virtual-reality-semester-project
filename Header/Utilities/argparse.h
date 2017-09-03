@@ -11,9 +11,12 @@
 
 #include <vector>
 
-const std::string MARKER = "-m";
-const std::string CAMERA_CALIBRATION = "-ccc";
+#include "../ImageDetection/camera.h"
 
-int parseArg(int argc, std::vector<std::string> argv, cv::Mat &markerImage);
+const std::string MARKER = "-m";
+const std::string CAMERA_CALIBRATION_COMPUTE = "-ccc";
+const std::string CAMERA_CALIBRATION_LOAD = "-ccl";
+
+int parseArg(int argc, std::vector<std::string> argv, cv::Mat &markerImage, std::vector<cv::Mat> &calibrationImages, CameraCalibration &cc);
 
 #endif

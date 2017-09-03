@@ -73,7 +73,7 @@ void GUI(cv::Mat &frame, Application &app, int fps)
  */
 void GUICameraCalibration(cv::Mat &frame, bool foundPoints)
 {
-    cvui::text(frame, frame.rows * 0.5f, frame.cols * 0.5f, foundPoints ? "SPACE -> Take frame for camera calibration" : "No chessboard points found!", 0.7, foundPoints ? 0x00FF00 : 0xFF0000);
-    cvui::text(frame, frame.rows * 0.5f + 5, frame.cols * 0.5f, "ENTER -> Commit images", 0.7, 0x0000FF);
+    cvui::text(frame, frame.rows * 0.05f, frame.cols * 0.05f, foundPoints ? "SPACE -> Take frame for camera calibration" : "No chessboard points found!", 0.7, foundPoints ? 0x00FF00 : 0xFF0000);
+    cvui::text(frame, frame.rows * 0.05f, frame.cols * 0.05f + frame.cols * 0.02f, "ENTER -> Commit images", 0.7, 0x0000FF);
     cvui::update();
 }
