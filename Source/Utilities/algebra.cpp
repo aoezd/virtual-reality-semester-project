@@ -29,7 +29,7 @@ Vec2 makeVec(const float &x, const float &y)
 /**
  *
  */
-void print(const Vec2 &v)
+void printVec(const Vec2 &v)
 {
     std::cout << "[" << v.x << ", " << v.y << "]" << std::endl;
 }
@@ -133,7 +133,7 @@ Vec3 makeVec(const float &x, const float &y, const float &z)
 /**
  *
  */
-void print(const Vec3 &v)
+void printVec(const Vec3 &v)
 {
     std::cout << "[" << v.x << ", " << v.y << ", " << v.z << "]" << std::endl;
 }
@@ -255,7 +255,7 @@ Vec4 makeVec(const float &x, const float &y, const float &z, const float &w)
 /**
  *
  */
-void print(const Vec4 &v)
+void printVec(const Vec4 &v)
 {
     std::cout << "[" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "]" << std::endl;
 }

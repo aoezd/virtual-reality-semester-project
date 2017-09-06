@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
             if (getNextFrame(frame))
             {
               frame.copyTo(result);
-              processFrame(frame, result, app);
+              processFrame(frame, result, app, cc);
               GUI(result, app, fps);
               cv::imshow(WINDOW, result);
               key = (char)cv::waitKey(20);

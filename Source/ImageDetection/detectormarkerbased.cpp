@@ -11,15 +11,28 @@
 #include <bitset>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/calib3d.hpp>
 
 #include "../../Header/ImageDetection/detectormarkerbased.h"
 #include "../../Header/Logging/logger.h"
+#include "../../Header/Utilities/algebra.h"
 
 const std::string LOGGING_NAME = "detectormarkerbased.cpp";
 
 /** Actual marker which will be searched in the given camera frame */
 // TODO: MORE THAN ONE MARKER!!!!
 Marker defaultMarker;
+
+/**
+ *
+ */
+std::vector<cv::Point3f> getMarker3DPoints(const float &markerRealEdgeLength)
+{
+    return {cv::Point3f(markerRealEdgeLength * -0.5f, markerRealEdgeLength * 0.5f, 0.0f),
+            cv::Point3f(markerRealEdgeLength * -0.5f, markerRealEdgeLength * -0.5f, 0.0f),
+            cv::Point3f(markerRealEdgeLength * 0.5f, markerRealEdgeLength * -0.5f, 0.0f),
+            cv::Point3f(markerRealEdgeLength * 0.5f, markerRealEdgeLength * 0.5f, 0.0f)};
+}
 
 /**
  * Computes a 5x5 bit mask from a given threshold image (marker).
@@ -321,19 +334,7 @@ bool getValidMarkersInFrame(Application &app, const cv::Mat &source, cv::Mat &re
                     // Draw circles at corners of marker for testing purpose
                     drawCornerDots(marker.points, result);
 
-                    /*
-ARUCO
-for (unsigned int i = 0; i < _corners.cols(); i++) {
-            cornerSubPix(grey, _corners.getMat(i),
-                         Size(params.cornerRefinementWinSize, params.cornerRefinementWinSize),
-                         Size(-1, -1), TermCriteria(TermCriteria::MAX_ITER | TermCriteria::EPS,
-                                                    params.cornerRefinementMaxIterations,
-                                                    params.cornerRefinementMinAccuracy));
-        }
-
-BUCH
-
-*/
+                    // TODO cornerSubPix? Nötig?
 
                     validMarkers.push_back(marker);
                     app.validMarkerCount++;
@@ -348,13 +349,45 @@ BUCH
 /**
  *
  */
-void processFrame(const cv::Mat &source, cv::Mat &result, Application &app)
+void estimatePosition(Marker marker, const CameraCalibration &cc)
 {
-    std::vector<Marker> markers;
+    cv::Mat rotationVector;
+    cv::Mat_<float> translationVector;
+    cv::Mat raux, taux;
+
+    cv::solvePnP(getMarker3DPoints(cc.markerRealEdgeLength), convertVP_VP2f(marker.points), cc.cameraMatrix, cc.distanceCoefficients, raux, taux);
+
+    raux.convertTo(rotationVector, CV_32F);
+    taux.convertTo(translationVector, CV_32F);
+
+    // Get rotation matrix from rotation vector
+    cv::Mat_<float> rotationMatrix(3, 3);
+    cv::Rodrigues(rotationVector, rotationMatrix);
+
+    // Copy rotation matrix and translation vector to marker
+    // Since solvePnP finds camera location with regard to marker pose -> to get marker pose with regard to the camera we invert it
+    marker.translationVector = neg(makeVec(translationVector(0), translationVector(1), translationVector(2)));
+    marker.rotationMatrix = inv(makeMatRows(
+        rotationMatrix(0, 0), rotationMatrix(0, 1), rotationMatrix(0, 2),
+        rotationMatrix(1, 0), rotationMatrix(1, 1), rotationMatrix(1, 2),
+        rotationMatrix(2, 0), rotationMatrix(2, 1), rotationMatrix(2, 2)));
+}
+
+/**
+ *
+ */
+void processFrame(const cv::Mat &source, cv::Mat &result, Application &app, const CameraCalibration &cc)
+{
+    std::vector<Marker> detectedMarkers;
 
     app.validMarkerCount = 0;
 
-    if (getValidMarkersInFrame(app, source, result, markers))
+    if (getValidMarkersInFrame(app, source, result, detectedMarkers))
     {
+        // Estimate all positions of marker and save corresponding transformation matrix
+        for (size_t i = 0; i < detectedMarkers.size(); i++)
+        {
+            estimatePosition(detectedMarkers[i], cc);
+        }
     }
 }

@@ -44,7 +44,7 @@ typedef struct
 
 // --------------- 2D functions ---------------
 Vec2 makeVec(const float &x, const float &y);
-void print(const Vec2 &v);
+void printVec(const Vec2 &v);
 Vec2 add(const Vec2 &vl, const Vec2 &vr);
 Vec2 sub(const Vec2 &vl, const Vec2 &vr);
 Vec2 neg(const Vec2 &v);
@@ -58,7 +58,7 @@ bool equal(const Vec2 &vl, const Vec2 &vr);
 
 // --------------- 3D functions ---------------
 Vec3 makeVec(const float &x, const float &y, const float &z);
-void print(const Vec3 &v);
+void printVec(const Vec3 &v);
 Vec3 add(const Vec3 &vl, const Vec3 &vr);
 Vec3 sub(const Vec3 &vl, const Vec3 &vr);
 Vec3 neg(const Vec3 &v);
@@ -74,7 +74,7 @@ bool equal(const Vec3 &vl, const Vec3 &vr);
 
 // --------------- 4D functions ---------------
 Vec4 makeVec(const float &x, const float &y, const float &z, const float &w);
-void print(const Vec4 &v);
+void printVec(const Vec4 &v);
 Vec4 add(const Vec4 &vl, const Vec3 &vr);
 Vec4 sub(const Vec4 &vl, const Vec3 &vr);
 Vec4 neg(const Vec4 &v);

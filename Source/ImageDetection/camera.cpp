@@ -79,57 +79,6 @@ void releaseCamera()
 
 // --------------- Camera Calibration Stuff ---------------
 
-// aruco DrawAXIS
-// void drawAxis(InputOutputArray _image, InputArray _cameraMatrix, InputArray _distCoeffs,
-//     InputArray _rvec, InputArray _tvec, float length) {
-// CV_Assert(_image.getMat().total() != 0 &&
-// (_image.getMat().channels() == 1 || _image.getMat().channels() == 3));
-// CV_Assert(length > 0);
-
-// // project axis points
-// vector< Point3f > axisPoints;
-// axisPoints.push_back(Point3f(0, 0, 0));
-// axisPoints.push_back(Point3f(length, 0, 0));
-// axisPoints.push_back(Point3f(0, length, 0));
-// axisPoints.push_back(Point3f(0, 0, length));
-// vector< Point2f > imagePoints;
-// projectPoints(axisPoints, _rvec, _tvec, _cameraMatrix, _distCoeffs, imagePoints);
-
-// // draw axis lines
-// line(_image, imagePoints[0], imagePoints[1], Scalar(0, 0, 255), 3);
-// line(_image, imagePoints[0], imagePoints[2], Scalar(0, 255, 0), 3);
-// line(_image, imagePoints[0], imagePoints[3], Scalar(255, 0, 0), 3);
-// }
-
-/**
- * Aruco
- posetracker
-
- bool MarkerPoseTracker::estimatePose(  Marker &m,const   CameraParameters &_cam_params,float _msize,float minerrorRatio){
-    
-    
-        if (_rvec.empty()){//if no previous data, use from scratch
-            cv::Mat rv,tv;
-            auto solutions=IPPE::solvePnP_(Marker::get3DPoints(_msize),m,_cam_params.CameraMatrix,_cam_params.Distorsion);
-            double errorRatio=solutions[1].second/solutions[0].second;
-            if (errorRatio<minerrorRatio) return false;//is te error ratio big enough
-            cv::solvePnP(Marker::get3DPoints(_msize),m,_cam_params.CameraMatrix,_cam_params.Distorsion,rv,tv);
-             rv.convertTo(_rvec,CV_32F);
-            tv.convertTo(_tvec,CV_32F);
-            impl__aruco_getRTfromMatrix44(solutions[0].first,rv,tv);
-         }
-        else{
-            cv::solvePnP(Marker::get3DPoints(_msize),m,_cam_params.CameraMatrix,_cam_params.Distorsion,_rvec,_tvec,true);
-    
-        }
-    
-        _rvec.copyTo(m.Rvec);
-        _tvec.copyTo(m.Tvec);
-        m.ssize=_msize;
-        return true;
-    }
-*/
-
 /**
  * BUCH
 
@@ -169,13 +118,13 @@ void estimatePosition(std::vector<Marker> &
  * @param chessboardRealTileEdgeLength  Size of one tile edge in meters
  * @param corners                       Computed corner positions
  */
-void createKnownBoardPosition(cv::Size boardSize, int chessboardRealTileEdgeLength, std::vector<cv::Point3f> &corners)
+void createKnownBoardPosition(cv::Size boardSize, float chessboardRealTileEdgeLength, std::vector<cv::Point3f> &corners)
 {
     for (int y = 0; y < boardSize.height; y++)
     {
         for (int x = 0; x < boardSize.width; x++)
         {
-            corners.push_back(cv::Point3f(y * chessboardRealTileEdgeLength, x * chessboardRealTileEdgeLength, 0.0f)); // Warum y zu erst?
+            corners.push_back(cv::Point3f((float)y * chessboardRealTileEdgeLength, (float)x * chessboardRealTileEdgeLength, 0.0f)); // Warum y zu erst?
         }
     }
 }
@@ -391,7 +340,7 @@ bool loadCameraCalibration(CameraCalibration &cc, const std::string &filePath)
         {
             for (j = 0; j < tempCols; j++)
             {
-                ifs >> cc.distanceCoefficients.at<double>(i, j);
+                ifs >> cc.cameraMatrix.at<double>(i, j);
             }
         }
 
@@ -418,47 +367,3 @@ bool loadCameraCalibration(CameraCalibration &cc, const std::string &filePath)
 
     return false;
 }
-
-/*
-static void _getSingleMarkerObjectPoints(float markerLength, OutputArray _objPoints) {
-
-    CV_Assert(markerLength > 0);
-
-    _objPoints.create(4, 1, CV_32FC3);
-    Mat objPoints = _objPoints.getMat();
-    // set coordinate system in the middle of the marker, with Z pointing out
-    objPoints.ptr< Vec3f >(0)[0] = Vec3f(-markerLength / 2.f, markerLength / 2.f, 0);
-    objPoints.ptr< Vec3f >(0)[1] = Vec3f(markerLength / 2.f, markerLength / 2.f, 0);
-    objPoints.ptr< Vec3f >(0)[2] = Vec3f(markerLength / 2.f, -markerLength / 2.f, 0);
-    objPoints.ptr< Vec3f >(0)[3] = Vec3f(-markerLength / 2.f, -markerLength / 2.f, 0);
-}
-
-void estimatePoseSingleMarkers(InputArrayOfArrays _corners, float markerLength,
-                               InputArray _cameraMatrix, InputArray _distCoeffs,
-                               OutputArray _rvecs, OutputArray _tvecs, OutputArray _objPoints) {
-
-    CV_Assert(markerLength > 0);
-
-    Mat markerObjPoints;
-    _getSingleMarkerObjectPoints(markerLength, markerObjPoints);
-    int nMarkers = (int)_corners.total();
-    _rvecs.create(nMarkers, 1, CV_64FC3);
-    _tvecs.create(nMarkers, 1, CV_64FC3);
-
-    Mat rvecs = _rvecs.getMat(), tvecs = _tvecs.getMat();
-
-    //// for each marker, calculate its pose
-    // for (int i = 0; i < nMarkers; i++) {
-    //    solvePnP(markerObjPoints, _corners.getMat(i), _cameraMatrix, _distCoeffs,
-    //             _rvecs.getMat(i), _tvecs.getMat(i));
-    //}
-
-    // this is the parallel call for the previous commented loop (result is equivalent)
-    parallel_for_(Range(0, nMarkers),
-                  SinglePoseEstimationParallel(markerObjPoints, _corners, _cameraMatrix,
-                                               _distCoeffs, rvecs, tvecs));
-    if(_objPoints.needed()){
-        markerObjPoints.convertTo(_objPoints, -1);
-    }
-}
-*/
