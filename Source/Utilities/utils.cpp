@@ -7,6 +7,7 @@
  */
 
 #include <iostream>
+#include <cfloat>
 
 #include "../../Header/Utilities/utils.h"
 
@@ -36,6 +37,18 @@ void printVP2f(const std::vector<cv::Point2f> &vp2f)
     }
     std::cout << '\b' << '\b' << "]," << std::endl;
 }
+/**
+ *
+ */
+void printVP3f(const std::vector<cv::Point3f> &vp3f)
+{
+    std::cout << "[";
+    for (size_t i = 0; i < vp3f.size(); i++)
+    {
+        std::cout << "(" << vp3f[i] << "), ";
+    }
+    std::cout << '\b' << '\b' << "]," << std::endl;
+}
 
 /**
  *
@@ -59,6 +72,19 @@ void printVVP2f(const std::vector<std::vector<cv::Point2f>> &vvp2f)
     for (size_t i = 0; i < vvp2f.size(); i++)
     {
         printVP2f(vvp2f[i]);
+    }
+    std::cout << '\b' << '\b' << "}" << std::endl;
+}
+
+/**
+  *
+  */
+void printVVP3f(const std::vector<std::vector<cv::Point3f>> &vvp3f)
+{
+    std::cout << "{" << std::endl;
+    for (size_t i = 0; i < vvp3f.size(); i++)
+    {
+        printVP3f(vvp3f[i]);
     }
     std::cout << '\b' << '\b' << "}" << std::endl;
 }
@@ -245,6 +271,128 @@ std::vector<cv::Point> rotateQuad90deg(const std::vector<cv::Point> &m, const bo
 float distance(cv::Point a, cv::Point b)
 {
     return cv::norm(a - b);
+}
+
+/**
+ * src: http://netstorage.iar.com/SuppDB/Public/SUPPORT/000419/AN-G-002.pdf
+ */
+unsigned int sqrt(unsigned int x)
+{
+    unsigned int a, b;
+
+    b = x;
+    a = x = 0x3f;
+    x = b / x;
+    a = x = (x + a) >> 1;
+    x = b / x;
+    a = x = (x + a) >> 1;
+    x = b / x;
+    x = (x + a) >> 1;
+
+    return (x);
+}
+
+/**
+ * src: http://h14s.p5r.org/2012/09/0x5f3759df.html
+ */
+float fastInvSqrt(float x)
+{
+    float xhalf = 0.5f * x;
+    int i = *(int *)&x;
+
+    i = 0x5f3759df - (i >> 1);
+    x = *(float *)&i;
+    x = x * (1.5f - (xhalf * x * x));
+
+    return x;
+}
+
+/**
+ *
+ */
+bool floatEqual(const float &x1, const float &x2)
+{
+    return fabs(x1 - x2) < FLT_EPSILON;
+}
+
+/**
+ *
+ */
+bool doubleEqual(const double &x1, const double &x2)
+{
+    return fabs(x1 - x2) < DBL_EPSILON;
+}
+
+/**
+ *
+ */
+float clampFloat(const float &x, const float &min, const float &max)
+{
+    if (x > max)
+    {
+        return max;
+    }
+
+    if (x < min)
+    {
+        return min;
+    }
+
+    return x;
+}
+
+/**
+ *
+ */
+float clampDouble(const double &x, const double &min, const double &max)
+{
+    if (x > max)
+    {
+        return max;
+    }
+
+    if (x < min)
+    {
+        return min;
+    }
+
+    return x;
+}
+
+/**
+ *
+ */
+int clampInt(const int &x, const int &min, const int &max)
+{
+    if (x > max)
+    {
+        return max;
+    }
+
+    if (x < min)
+    {
+        return min;
+    }
+
+    return x;
+}
+
+/**
+ *
+ */
+unsigned clampUint(const unsigned &x, const unsigned &min, const unsigned &max)
+{
+    if (x > max)
+    {
+        return max;
+    }
+
+    if (x < min)
+    {
+        return min;
+    }
+
+    return x;
 }
 
 // --------------- Drawing Stuff ---------------
