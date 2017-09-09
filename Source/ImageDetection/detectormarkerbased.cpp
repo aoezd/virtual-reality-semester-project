@@ -329,12 +329,12 @@ bool getValidMarkersInFrame(Application &app, const cv::Mat &source, cv::Mat &re
                 if (isValidMarker(marker))
                 {
                     // Rotate the marker positions so that every marker has the same origin orientation
-                    marker.points = rotateQuad90deg(quad, false, marker.rotationCount);
+                    marker.points = convertVP_VP2f(rotateQuad90deg(quad, false, marker.rotationCount));
+
+                    cv::cornerSubPix(grayscale, marker.points, cv::Size(5, 5), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_ITER, 30, 0.1f));
 
                     // Draw circles at corners of marker for testing purpose
                     drawCornerDots(marker.points, result);
-
-                    // TODO cornerSubPix? Nötig?
 
                     validMarkers.push_back(marker);
                     app.validMarkerCount++;
@@ -355,7 +355,7 @@ void estimatePosition(Marker marker, const CameraCalibration &cc)
     cv::Mat_<float> translationVector;
     cv::Mat raux, taux;
 
-    cv::solvePnP(getMarker3DPoints(cc.markerRealEdgeLength), convertVP_VP2f(marker.points), cc.cameraMatrix, cc.distanceCoefficients, raux, taux);
+    cv::solvePnP(getMarker3DPoints(cc.markerRealEdgeLength), marker.points, cc.cameraMatrix, cc.distanceCoefficients, raux, taux);
 
     raux.convertTo(rotationVector, CV_32F);
     taux.convertTo(translationVector, CV_32F);

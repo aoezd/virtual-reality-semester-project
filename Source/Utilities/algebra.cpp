@@ -458,7 +458,7 @@ Vec3 mulMatVec(const Mat3 &m, const Vec3 &v)
 /**
  *
  */
-Mat3 zeroM3()
+Mat3 zeroM3(void)
 {
     return makeMatRows(
         0.0f, 0.0f, 0.0f,
@@ -469,7 +469,7 @@ Mat3 zeroM3()
 /**
  *
  */
-Mat3 identityM3()
+Mat3 identityM3(void)
 {
     return makeMatRows(
         1.0f, 0.0f, 0.0f,
@@ -656,7 +656,7 @@ Vec4 mulMatVec(const Mat4 &m, const Vec4 &v)
 /**
  *
  */
-Mat4 zeroM4()
+Mat4 zeroM4(void)
 {
     return makeMatRows(
         0.0f, 0.0f, 0.0f, 0.0f,
@@ -668,7 +668,7 @@ Mat4 zeroM4()
 /**
  *
  */
-Mat4 identityM4()
+Mat4 identityM4(void)
 {
     return makeMatRows(
         1.0f, 0.0f, 0.0f, 0.0f,

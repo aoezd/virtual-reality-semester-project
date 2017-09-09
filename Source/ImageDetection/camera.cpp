@@ -80,38 +80,6 @@ void releaseCamera()
 // --------------- Camera Calibration Stuff ---------------
 
 /**
- * BUCH
-
-void estimatePosition(std::vector<Marker> &
-                          detectedMarkers)
-{
-    for (size_t i = 0; i < detectedMarkers.size(); i++)
-    {
-        Marker &m = detectedMarkers[i];
-        cv::Mat Rvec;
-        cv::Mat_<float> Tvec;
-        cv::Mat raux, taux;
-        cv::solvePnP(m_markerCorners3d, m.points, camMatrix,
-                     distCoeff, raux, taux);
-        raux.convertTo(Rvec, CV_32F);
-        taux.convertTo(Tvec, CV_32F);
-        cv::Mat_<float> rotMat(3, 3);
-        cv::Rodrigues(Rvec, rotMat);
-
-        m.transformation = Transformation();
-        for (int col = 0; col < 3; col++)
-        {
-            for (int row = 0; row < 3; row++)
-            {
-                m.transformation.r().mat[row][col] = rotMat(row, col);
-            }
-            m.transformation.t().data[col] = Tvec(col);
-        }
-        m.transformation = m.transformation.getInverted();
-    }
-} */
-
-/**
  * Computes the corners of the tiles in a chessboard pattern in real world points (cv::Point3f)
  *
  * @param boardSize                     Dimensions of chessboard size

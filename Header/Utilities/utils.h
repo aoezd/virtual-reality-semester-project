@@ -63,27 +63,6 @@ int clampInt(const int &x, const int &min, const int &max);
 unsigned clampUint(const unsigned &x, const unsigned &min, const unsigned &max);
 
 // --------------- Drawing Stuff ---------------
-void drawCornerDots(const std::vector<cv::Point> &polygon, cv::Mat &image);
+void drawCornerDots(const std::vector<cv::Point2f> &polygon, cv::Mat &image);
 
 #endif
-
-// TRASH
-// cv::imwrite("/home/aoez/Schreibtisch/source.jpg", source);
-// cv::imwrite("/home/aoez/Schreibtisch/DefaultMarker.jpg", defaultMarker.image);
-// cv::imwrite("/home/aoez/Schreibtisch/CurrentMarker.jpg", marker.image);
-// cv::imwrite("/home/aoez/Schreibtisch/CurrentMarkerThreshold.jpg", thresholdMarker);
-// std::cout << "hasBorder: " + std::to_string(hasBlackBorder(thresholdMarker)) << std::endl;
-// marker.bitMask = computeBitMask(thresholdMarker);
-// std::cout << "marker.bitMask: " << std::endl
-//           << marker.bitMask << std::endl;
-// std::cout << "isValidMarker: " + std::to_string(isValidMarker(marker)) << std::endl;
-// std::cout << "rotationCount: " + std::to_string(marker.rotationCount) << std::endl;
-// cv::imwrite("/home/aoez/Schreibtisch/result0.jpg", result);
-// std::cin.get();
-
-/**
-IDEEN für weitere Features
-
-http://www.morethantechnical.com/2010/11/10/20-lines-ar-in-opencv-wcode/
-
-*/

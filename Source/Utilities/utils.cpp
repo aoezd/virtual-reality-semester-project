@@ -400,7 +400,7 @@ unsigned clampUint(const unsigned &x, const unsigned &min, const unsigned &max)
 /**
  *
  */
-void drawCornerDots(const std::vector<cv::Point> &polygon, cv::Mat &image)
+void drawCornerDots(const std::vector<cv::Point2f> &polygon, cv::Mat &image)
 {
     for (size_t i = 0; i < polygon.size(); i++)
     {

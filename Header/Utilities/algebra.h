@@ -94,8 +94,8 @@ Mat3 makeMatCols(const float &m00, const float &m01, const float &m02, const flo
 Mat3 makeMatRows(const float &m00, const float &m01, const float &m02, const float &m10, const float &m11, const float &m12, const float &m20, const float &m21, const float &m22);
 Mat3 mulMatMat(const Mat3 &ml, const Mat3 &mr);
 Vec3 mulMatVec(const Mat3 &m, const Vec3 &v);
-Mat3 zeroM3();
-Mat3 identityM3();
+Mat3 zeroM3(void);
+Mat3 identityM3(void);
 Mat3 inv(const Mat3 &m);
 Mat3 transpose(const Mat3 &m);
 void printMat(const Mat3 &m);
@@ -107,8 +107,8 @@ Mat4 makeMatCols(const float &m00, const float &m01, const float &m02, const flo
 Mat4 makematRows(const float &m00, const float &m01, const float &m02, const float &m03, const float &m10, const float &m11, const float &m12, const float &m13, const float &m20, const float &m21, const float &m22, const float &m23, const float &m30, const float &m31, const float &m32, const float &m33);
 Mat4 mulMatMat(const Mat4 &ml, const Mat4 &mr);
 Vec4 mulMatVec(const Mat4 &m, const Vec4 &v);
-Mat4 zeroM4();
-Mat4 identityM4();
+Mat4 zeroM4(void);
+Mat4 identityM4(void);
 Mat4 inv(const Mat4 &m);
 Mat4 transpose(const Mat4 &m);
 void printMat(const Mat4 &m);

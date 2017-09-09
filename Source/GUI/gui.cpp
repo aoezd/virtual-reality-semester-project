@@ -47,7 +47,7 @@ void GUI(cv::Mat &frame, Application &app, int fps)
 
     // Min side edge length
     cvui::text("Min side edge length");
-    cvui::trackbar(150, &app.minSideEdgeLength, 1000, 30000);
+    cvui::trackbar(150, &app.minSideEdgeLength, 1000, 25000);
     cvui::space(5);
 
     // Computation bit mask

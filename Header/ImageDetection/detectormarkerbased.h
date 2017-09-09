@@ -16,7 +16,7 @@ typedef struct
     unsigned char rotationCount;
     uint32_t id;
     cv::Mat bitMask;
-    std::vector<cv::Point> points;
+    std::vector<cv::Point2f> points;
     Mat3 rotationMatrix;
     Vec3 translationVector;
 } Marker; // Defines a marker which must be detected in a frame
