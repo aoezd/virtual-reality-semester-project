@@ -1,4 +1,7 @@
-# Virtual-Reality-Praktikum
+# How to start the application
 
-## TODOs
-Implement better error correction so concealed (valid) marker could also be tracked
+# How to use the application
+
+# How to calibrate your camera
+
+# How to make and include Aruco Marker
