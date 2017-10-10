@@ -2,58 +2,39 @@
 .vscode
 
 # Prerequisites
-/Application/*.d
-/Tests/*.d
+*.d
 
 # Compiled Object files
-/Application/*.slo
-/Application/*.lo
-/Application/*.o
-/Application/*.obj
-/Tests/*.slo
-/Tests/*.lo
-/Tests/*.o
-/Tests/*.obj
+*.slo
+*.lo
+*.o
+*.obj
 
 # Precompiled Headers
-/Application/*.gch
-/Application/*.pch
-/Tests/*.gch
-/Tests/*.pch
+*.gch
+*.pch
 
 # Compiled Dynamic libraries
-/Application/*.so
-/Application/*.dylib
-/Application/*.dll
-/Tests/*.so
-/Tests/*.dylib
-/Tests/*.dll
+*.so
+*.dylib
+*.dll
 
 # Fortran module files
-/Application/*.mod
-/Application/*.smod
-/Tests/*.mod
-/Tests/*.smod
+*.mod
+*.smod
 
 # Compiled Static libraries
-/Application/*.lai
-/Application/*.la
-/Application/*.a
-/Application/*.lib
-/Tests/*.lai
-/Tests/*.la
-/Tests/*.a
-/Tests/*.lib
+*.lai
+*.la
+*.a
+*.lib
 
 # Executables
-/Application/*.exe
-/Application/*.out
-/Application/*.app
-/Application/mb-ar-app
-/Tests/*.exe
-/Tests/*.out
-/Tests/*.app
-/Tests/testsuite
+*.exe
+*.out
+*.app
+mb-ar-app
+testsuite
 
 # Resources
 /Application/Resources
