@@ -2,41 +2,61 @@
 .vscode
 
 # Prerequisites
-*.d
+/Application/*.d
+/Tests/*.d
 
 # Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+/Application/*.slo
+/Application/*.lo
+/Application/*.o
+/Application/*.obj
+/Tests/*.slo
+/Tests/*.lo
+/Tests/*.o
+/Tests/*.obj
 
 # Precompiled Headers
-*.gch
-*.pch
+/Application/*.gch
+/Application/*.pch
+/Tests/*.gch
+/Tests/*.pch
 
 # Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+/Application/*.so
+/Application/*.dylib
+/Application/*.dll
+/Tests/*.so
+/Tests/*.dylib
+/Tests/*.dll
 
 # Fortran module files
-*.mod
-*.smod
+/Application/*.mod
+/Application/*.smod
+/Tests/*.mod
+/Tests/*.smod
 
 # Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+/Application/*.lai
+/Application/*.la
+/Application/*.a
+/Application/*.lib
+/Tests/*.lai
+/Tests/*.la
+/Tests/*.a
+/Tests/*.lib
 
 # Executables
-*.exe
-*.out
-*.app
-vr
+/Application/*.exe
+/Application/*.out
+/Application/*.app
+/Application/mb-ar-app
+/Tests/*.exe
+/Tests/*.out
+/Tests/*.app
+/Tests/testsuite
 
 # Resources
-/Resources
-/Images/CameraCalibration
+/Application/Resources
+/Application/Images/CameraCalibration
 
 .depend
