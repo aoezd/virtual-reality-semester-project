@@ -51,10 +51,12 @@ TEST_CASE("VECTOR")
 
         SECTION("dot")
         {
+            REQUIRE(floatEqual(26.0f, dot(v2l, v2r)));
         }
 
         SECTION("length")
         {
+            REQUIRE(floatEqual(5.0f, length(makeVec(4.0f, 3.0f))));
         }
 
         SECTION("normalize")
@@ -76,19 +78,20 @@ TEST_CASE("VECTOR")
 
     SECTION("3D")
     {
-        Vec3 v3l, v3r;
+        Vec3 v3l = makeVec(5.0f, 2.0f, 2.0f);
+        Vec3 v3r = makeVec(1.0f, 3.0f, 4.0f);
 
         SECTION("makeVec")
         {
-            v3l = makeVec(5, 2, 2);
-
-            REQUIRE(floatEqual(v3l.data[X], 5));
-            REQUIRE(floatEqual(v3l.data[Y], 2));
-            REQUIRE(floatEqual(v3l.data[Z], 2));
+            REQUIRE(floatEqual(v3l.data[X], 5.0f));
+            REQUIRE(floatEqual(v3l.data[Y], 2.0f));
+            REQUIRE(floatEqual(v3l.data[Z], 2.0f));
         }
 
         SECTION("add")
         {
+            Vec3 addres = makeVec(6.0f, 5.0f, 6.0f);
+            REQUIRE(equal(addres, add(v3l, v3r)));
         }
 
         SECTION("sub")
@@ -113,6 +116,7 @@ TEST_CASE("VECTOR")
 
         SECTION("length")
         {
+            REQUIRE(floatEqual(5.0f, length(makeVec(4.0f, 3.0f, 0.0f))));
         }
 
         SECTION("normalize")
@@ -134,12 +138,12 @@ TEST_CASE("VECTOR")
 
         SECTION("makeVec")
         {
-            v4l = makeVec(5, 2, 2, 3);
+            v4l = makeVec(5.0f, 2.0f, 2.0f, 3.0f);
 
-            REQUIRE(floatEqual(v4l.data[X], 5));
-            REQUIRE(floatEqual(v4l.data[Y], 2));
-            REQUIRE(floatEqual(v4l.data[Z], 2));
-            REQUIRE(floatEqual(v4l.data[W], 3));
+            REQUIRE(floatEqual(v4l.data[X], 5.0f));
+            REQUIRE(floatEqual(v4l.data[Y], 2.0f));
+            REQUIRE(floatEqual(v4l.data[Z], 2.0f));
+            REQUIRE(floatEqual(v4l.data[W], 3.0f));
         }
 
         SECTION("add")
@@ -168,6 +172,7 @@ TEST_CASE("VECTOR")
 
         SECTION("length")
         {
+            REQUIRE(floatEqual(5.0f, length(makeVec(2.0f, 2.0f, 4.0f, 1.0f))));
         }
 
         SECTION("normalize")

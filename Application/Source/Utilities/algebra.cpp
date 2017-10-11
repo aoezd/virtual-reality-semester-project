@@ -62,7 +62,7 @@ float dot(const Vec2 &vl, const Vec2 &vr)
 
 float length(const Vec2 &v)
 {
-    return fastInvSqrt(dot(v, v));
+    return sqrt(dot(v, v));
 }
 
 Vec2 normalize(const Vec2 &v)
@@ -130,7 +130,7 @@ float dot(const Vec3 &vl, const Vec3 &vr)
 
 float length(const Vec3 &v)
 {
-    return fastInvSqrt(dot(v, v));
+    return sqrt(dot(v, v));
 }
 
 Vec3 normalize(const Vec3 &v)
@@ -209,7 +209,7 @@ float dot(const Vec4 &vl, const Vec4 &vr)
 
 float length(const Vec4 &v)
 {
-    return fastInvSqrt(dot(v, v));
+    return sqrt(dot(v, v));
 }
 
 Vec4 normalize(const Vec4 &v)

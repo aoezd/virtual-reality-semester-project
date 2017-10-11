@@ -11,13 +11,8 @@
 
 #include "../../Header/Utilities/utils.h"
 
-/**
- * Specifies whether two strings are equivalent.
- * 
- * @param str1 first string
- * @param str2 second string
- * @return true, if both strings are equivalent
- */
+// --------------- String Stuff ---------------
+
 bool equal(const std::string &str1, const std::string &str2)
 {
     return !str1.compare(str2);
@@ -25,9 +20,6 @@ bool equal(const std::string &str1, const std::string &str2)
 
 // --------------- Printing Stuff ---------------
 
-/**
- *
- */
 void printVP2f(const std::vector<cv::Point2f> &vp2f)
 {
     std::cout << "[";
@@ -37,9 +29,7 @@ void printVP2f(const std::vector<cv::Point2f> &vp2f)
     }
     std::cout << '\b' << '\b' << "]," << std::endl;
 }
-/**
- *
- */
+
 void printVP3f(const std::vector<cv::Point3f> &vp3f)
 {
     std::cout << "[";
@@ -50,9 +40,6 @@ void printVP3f(const std::vector<cv::Point3f> &vp3f)
     std::cout << '\b' << '\b' << "]," << std::endl;
 }
 
-/**
- *
- */
 void printVP(const std::vector<cv::Point> &vp)
 {
     std::cout << "[";
@@ -63,9 +50,6 @@ void printVP(const std::vector<cv::Point> &vp)
     std::cout << '\b' << '\b' << "]," << std::endl;
 }
 
-/**
-  *
-  */
 void printVVP2f(const std::vector<std::vector<cv::Point2f>> &vvp2f)
 {
     std::cout << "{" << std::endl;
@@ -76,9 +60,6 @@ void printVVP2f(const std::vector<std::vector<cv::Point2f>> &vvp2f)
     std::cout << '\b' << '\b' << "}" << std::endl;
 }
 
-/**
-  *
-  */
 void printVVP3f(const std::vector<std::vector<cv::Point3f>> &vvp3f)
 {
     std::cout << "{" << std::endl;
@@ -89,9 +70,6 @@ void printVVP3f(const std::vector<std::vector<cv::Point3f>> &vvp3f)
     std::cout << '\b' << '\b' << "}" << std::endl;
 }
 
-/**
- *
- */
 void printVVP(const std::vector<std::vector<cv::Point>> &vvp)
 {
     std::cout << "{" << std::endl;
@@ -104,9 +82,6 @@ void printVVP(const std::vector<std::vector<cv::Point>> &vvp)
 
 // --------------- Converting Stuff ---------------
 
-/**
- *
- */
 std::vector<cv::Point2f> convertVP_VP2f(const std::vector<cv::Point> &vp)
 {
     std::vector<cv::Point2f> vp2f;
@@ -119,9 +94,6 @@ std::vector<cv::Point2f> convertVP_VP2f(const std::vector<cv::Point> &vp)
     return vp2f;
 }
 
-/**
- *
- */
 std::vector<cv::Point> convertVP2f_VP(const std::vector<cv::Point2f> &vp2f)
 {
     std::vector<cv::Point> vp;
@@ -134,9 +106,6 @@ std::vector<cv::Point> convertVP2f_VP(const std::vector<cv::Point2f> &vp2f)
     return vp;
 }
 
-/**
- *
- */
 std::vector<std::vector<cv::Point2f>> convertVVP_VVP2f(const std::vector<std::vector<cv::Point>> &vvp)
 {
     std::vector<std::vector<cv::Point2f>> vvp2f;
@@ -149,9 +118,6 @@ std::vector<std::vector<cv::Point2f>> convertVVP_VVP2f(const std::vector<std::ve
     return vvp2f;
 }
 
-/**
-  *
-  */
 std::vector<std::vector<cv::Point>> convertVVP2f_VVP(const std::vector<std::vector<cv::Point2f>> &vvp2f)
 {
     std::vector<std::vector<cv::Point>> vvp;
@@ -164,18 +130,12 @@ std::vector<std::vector<cv::Point>> convertVVP2f_VVP(const std::vector<std::vect
     return vvp;
 }
 
-/**
- *
- */
 std::vector<cv::Point2f> getCornerPoints2f(cv::Mat image)
 {
     std::vector<cv::Point2f> c2f{cv::Point2f(image.rows, 0), cv::Point2f(image.rows, image.cols), cv::Point2f(0, image.cols), cv::Point2f(0, 0)};
     return c2f;
 }
 
-/**
- *
- */
 std::vector<cv::Point> getCornerPoints(cv::Mat image)
 {
     std::vector<cv::Point> c{cv::Point(image.rows, 0), cv::Point(image.rows, image.cols), cv::Point(0, image.cols), cv::Point(0, 0)};
@@ -184,9 +144,6 @@ std::vector<cv::Point> getCornerPoints(cv::Mat image)
 
 // --------------- Algebra Stuff ---------------
 
-/**
- *
- */
 cv::Mat rotate90deg(const cv::Mat &m, const bool &clockwise)
 {
     cv::Mat t, f;
@@ -197,9 +154,6 @@ cv::Mat rotate90deg(const cv::Mat &m, const bool &clockwise)
     return f;
 }
 
-/**
- *
- */
 cv::Mat rotate90deg(const cv::Mat &m, const bool &clockwise, int count)
 {
     if (!count)
@@ -265,9 +219,6 @@ std::vector<cv::Point> rotateQuad90deg(const std::vector<cv::Point> &m, const bo
     return t;
 }
 
-/**
- *
- */
 float distance(cv::Point a, cv::Point b)
 {
     return cv::norm(a - b);
@@ -295,7 +246,7 @@ unsigned int sqrt(unsigned int x)
 /**
  * src: http://h14s.p5r.org/2012/09/0x5f3759df.html
  */
-float fastInvSqrt(float x)
+float fastApproxInvSqrt(float x)
 {
     float xhalf = 0.5f * x;
     int i = *(int *)&x;
@@ -304,28 +255,19 @@ float fastInvSqrt(float x)
     x = *(float *)&i;
     x = x * (1.5f - (xhalf * x * x));
 
-    return x;
+    return 1.0f / x;
 }
 
-/**
- *
- */
 bool floatEqual(const float &x1, const float &x2)
 {
     return fabs(x1 - x2) < FLT_EPSILON;
 }
 
-/**
- *
- */
 bool doubleEqual(const double &x1, const double &x2)
 {
     return fabs(x1 - x2) < DBL_EPSILON;
 }
 
-/**
- *
- */
 float clampFloat(const float &x, const float &min, const float &max)
 {
     if (x > max)
@@ -341,9 +283,6 @@ float clampFloat(const float &x, const float &min, const float &max)
     return x;
 }
 
-/**
- *
- */
 float clampDouble(const double &x, const double &min, const double &max)
 {
     if (x > max)
@@ -359,9 +298,6 @@ float clampDouble(const double &x, const double &min, const double &max)
     return x;
 }
 
-/**
- *
- */
 int clampInt(const int &x, const int &min, const int &max)
 {
     if (x > max)
@@ -377,9 +313,6 @@ int clampInt(const int &x, const int &min, const int &max)
     return x;
 }
 
-/**
- *
- */
 unsigned clampUint(const unsigned &x, const unsigned &min, const unsigned &max)
 {
     if (x > max)
@@ -397,9 +330,6 @@ unsigned clampUint(const unsigned &x, const unsigned &min, const unsigned &max)
 
 // --------------- Drawing Stuff ---------------
 
-/**
- *
- */
 void drawCornerDots(const std::vector<cv::Point2f> &polygon, cv::Mat &image)
 {
     for (size_t i = 0; i < polygon.size(); i++)

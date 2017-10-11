@@ -54,7 +54,7 @@ std::vector<cv::Point> rotateQuad90deg(const std::vector<cv::Point> &m, const bo
 std::vector<cv::Point> rotateQuad90deg(const std::vector<cv::Point> &m, const bool &clockwise, int count);
 float distance(cv::Point a, cv::Point b);
 unsigned int root(unsigned int x);
-float fastInvSqrt(float x);
+float fastApproxInvSqrt(float x);
 bool floatEqual(const float &x1, const float &x2);
 bool doubleEqual(const double &x1, const double &x2);
 float clampFloat(const float &x, const float &min, const float &max);
