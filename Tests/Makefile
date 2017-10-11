@@ -1,7 +1,7 @@
 CC		= g++
 CPPFLAGS	= -g -W -Wall -Wextra --std=c++11
-SRCS		= $(shell find . -type f -name '*.cpp')
-HEDS		= $(shell find . -type f -name '*.h')
+SRCS		= $(shell find .. -type f -name '*.cpp' ! -name 'main.cpp')
+HEDS		= $(shell find .. -type f -name '*.h')
 OBJS		= $(SRCS:%.cpp=%.o)
 PROG		= testsuite
 

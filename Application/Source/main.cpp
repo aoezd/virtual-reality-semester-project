@@ -23,7 +23,23 @@
 const std::string LOGGING_NAME = "main.cpp";
 
 /**
- *
+ * Evaluates the pressed key by user and processes accordingly.
+ * 
+ * @param key Pressed key by user
+ * @return    false, if application should be aborted
+ */
+bool evaluateUserInput(char key)
+{
+  // Abort application
+  if (key != ESC && key != _Q && key != _q)
+  {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * 
  */
 void computeFPS(int &frameCounter, const time_t &start, int &tick, int &fps)
 {
@@ -37,7 +53,47 @@ void computeFPS(int &frameCounter, const time_t &start, int &tick, int &fps)
 }
 
 /**
- *
+ * Processing will be started if the application was correctfully executed.
+ * For every frame coming from the camera will be given to the markerbased detector
+ * and checked if valid marker are in the scene. Subsequently the processed frame
+ * will be passed forward to the OpenGL context and will be rendered.
+ * 
+ * @param app Settings of the application
+ * @param cc  Calibration settings of camera
+ */
+void startProcessing(Application app, CameraCalibration cc)
+{
+  cv::Mat frame, result;
+  char key = 0;
+  int frameCounter = 0, tick = 0, fps;
+  time_t start = time(0);
+
+  do
+  {
+    if (getNextFrame(frame))
+    {
+      std::vector<Marker> detectedMarkers;
+      frame.copyTo(result);
+      processFrame(frame, result, app, cc, detectedMarkers);
+      GUI(result, app, fps);
+      updateWindowGL(WINDOW, result, detectedMarkers);
+      key = (char)cv::waitKey(5);
+    }
+    else
+    {
+      logWarn(LOGGING_NAME, "Frame of camera is empty.");
+    }
+
+    computeFPS(frameCounter, start, tick, fps);
+  } while evaluateUserInput(key);
+}
+
+/**
+ * Start of application.
+ * 
+ * @param argc  Count of command line arguments
+ * @param argv  Command line arguments
+ * @return      0, if no error occured
  */
 int main(int argc, char *argv[])
 {
@@ -59,53 +115,31 @@ int main(int argc, char *argv[])
     {
       if (initializeCamera(cc, calibrationImages))
       {
-        cv::Mat frame, result;
-        Application app;
-        char key = 0;
-        int frameCounter = 0, tick = 0, fps;
-        time_t start = time(0);
-
         if (initializeGL(WINDOW, cc))
         {
+          Application app;
           initializeGUI(WINDOW, app);
-
           if (initializeDetectorMarkerBased(app, markerImage))
           {
-            do
-            {
-              if (getNextFrame(frame))
-              {
-                std::vector<Marker> detectedMarkers;
-                frame.copyTo(result);
-                processFrame(frame, result, app, cc, detectedMarkers);
-                GUI(result, app, fps);
-                updateWindowGL(WINDOW, result, detectedMarkers);
-                key = (char)cv::waitKey(5);
-              }
-              else
-              {
-                logWarn(LOGGING_NAME, "Frame of camera is empty.");
-              }
-  
-              computeFPS(frameCounter, start, tick, fps);
-            } while (key != ESC && key != _Q && key != _q);
+            startProcessing(app, cc);
           }
           else
           {
             logError(LOGGING_NAME, "Couldn't initialize marker based detector.");
             err++;
           }
-        } else {
+        }
+        else
+        {
           logError(LOGGING_NAME, "Couldn't initialize GL context.");
           err++;
-        }        
+        }
       }
       else
       {
         logError(LOGGING_NAME, "Couldn't initialize (default) camera or calibrate it.");
         err++;
       }
-
       releaseCamera();
     }
     else

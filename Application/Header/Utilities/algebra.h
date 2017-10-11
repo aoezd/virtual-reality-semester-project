@@ -86,6 +86,7 @@ bool equal(const Vec4 &vl, const Vec4 &vr);
 Vec3 wDiv(const Vec4 &v);
 
 // --------------- Matrix3 functions ---------------
+bool equal(const Mat3 &ml, const Mat3 &mr);
 Mat3 makeMatCols(const Vec3 &col0, const Vec3 &col1, const Vec3 &col2);
 Mat3 makeMatRows(const Vec3 &col0, const Vec3 &col1, const Vec3 &col2);
 Mat3 makeMatCols(const float &m00, const float &m01, const float &m02, const float &m10, const float &m11, const float &m12, const float &m20, const float &m21, const float &m22);
@@ -99,6 +100,7 @@ Mat3 transpose(const Mat3 &m);
 void printMat(const Mat3 &m);
 
 // --------------- Matrix4 functions ---------------
+bool equal(const Mat4 &ml, const Mat4 &mr);
 Mat4 makeMatCols(const Vec4 &col0, const Vec4 &col1, const Vec4 &col2, const Vec4 &col3);
 Mat4 makeMatRows(const Vec4 &col0, const Vec4 &col1, const Vec4 &col2, const Vec4 &col3);
 Mat4 makeMatCols(const float &m00, const float &m01, const float &m02, const float &m03, const float &m10, const float &m11, const float &m12, const float &m13, const float &m20, const float &m21, const float &m22, const float &m23, const float &m30, const float &m31, const float &m32, const float &m33);
@@ -129,6 +131,6 @@ Mat4 makeLookAt(const Vec3 &center, const Vec3 &lookAt, const Vec3 &up);
 
 // --------------- OpenCV Matrices ---------------
 Mat4 makeOrthographic(int w, int h);
-Mat4 makePerspective(const CameraCalibration &cc, int w, int h, float near, float far);
+Mat4 makePerspective(const float &fx, const float &fy, const float &cx, const float &cy, const int &w, const int &h, const float &near, const float &far);
 
 #endif

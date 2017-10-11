@@ -100,7 +100,6 @@ void printVec(const Vec3 &v)
 
 Vec3 add(const Vec3 &vl, const Vec3 &vr)
 {
-
     return makeVec(vl.data[X] + vr.data[X], vl.data[Y] + vr.data[Y], vl.data[Z] + vr.data[Z]);
 }
 
@@ -234,6 +233,18 @@ Vec3 wDiv(const Vec4 &v)
 }
 
 // --------------- Matrix3 functions ---------------
+
+bool equal(const Mat3 &ml, const Mat3 &mr)
+{
+    bool b = true;
+
+    for (int i = 0; i < 9 && b; i++)
+    {
+        b = floatEqual(ml.data[i], mr.data[i]);
+    }
+
+    return b;
+}
 
 Mat3 makeMatCols(const Vec3 &col0, const Vec3 &col1, const Vec3 &col2)
 {
@@ -387,6 +398,18 @@ void printMat(const Mat3 &m)
 }
 
 // --------------- Matrix4 functions ---------------
+
+bool equal(const Mat4 &ml, const Mat4 &mr)
+{
+    bool b = true;
+
+    for (int i = 0; i < 16 && b; i++)
+    {
+        b = floatEqual(ml.data[i], mr.data[i]);
+    }
+
+    return b;
+}
 
 Mat4 makeMatCols(const Vec4 &col0, const Vec4 &col1, const Vec4 &col2, const Vec4 &col3)
 {
@@ -741,13 +764,16 @@ Mat4 makeLookAt(const Vec3 &center, const Vec3 &lookAt, const Vec3 &up)
 
 Mat4 makeOrthographic(int w, int h)
 {
-    return makeMatRows(0.0f, -2.0f / static_cast<float>(w), 0.0f, 0.0f, -2.0f / static_cast<float>(h), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f);
+    return makeMatRows(0.0f, -2.0f / static_cast<float>(w), 0.0f, 0.0f,
+                       -2.0f / static_cast<float>(h), 0.0f, 0.0f, 0.0f,
+                       0.0f, 0.0f, 1.0f, 0.0f,
+                       1.0f, 1.0f, 0.0f, 1.0f);
 }
 
-/**
- * Todo
- */
-Mat4 makePerspective(const CameraCalibration &cc, int w, int h, float near, float far)
+Mat4 makePerspective(const float &fx, const float &fy, const float &cx, const float &cy, const int &w, const int &h, const float &near, const float &far)
 {
-    return makeMatRows(0.0f, -2.0f / w, 0.0f, 0.0f, -2.0f / h, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f);
+    return makeMatRows(-2.0f * fx / w, 0.0f, 2.0f * cx / w - 1.0f, 0.0f,
+                       0.0f, 2.0f * fy / h, 2.0f * cy / h - 1.0f, 0.0f,
+                       0.0f, 0.0f, -(far + near) / (far - near), -2.0f * far * near / (far - near),
+                       0.0f, 0.0f, -1.0f, 1.0f);
 }

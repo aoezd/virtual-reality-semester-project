@@ -17,8 +17,7 @@ typedef struct
     uint32_t id;
     cv::Mat bitMask;
     std::vector<cv::Point2f> points;
-    Mat3 rotationMatrix;
-    Vec3 translationVector;
+    Mat4 transformation;
 } Marker; // Defines a marker which must be detected in a frame
 
 bool initializeDetectorMarkerBased(const Application &app, const cv::Mat &markerImage);

@@ -385,11 +385,18 @@ void estimatePosition(Marker &marker, const CameraCalibration &cc)
 
     // Copy rotation matrix and translation vector to marker
     // Since solvePnP finds camera location with regard to marker pose -> to get marker pose with regard to the camera we invert it
-    marker.translationVector = neg(makeVec(translationVector(0), translationVector(1), translationVector(2)));
-    marker.rotationMatrix = inv(makeMatRows(
+    Vec3 tV = neg(makeVec(translationVector(0), translationVector(1), translationVector(2)));
+    Mat3 rM = inv(makeMatRows(
         rotationMatrix(0, 0), rotationMatrix(0, 1), rotationMatrix(0, 2),
         rotationMatrix(1, 0), rotationMatrix(1, 1), rotationMatrix(1, 2),
         rotationMatrix(2, 0), rotationMatrix(2, 1), rotationMatrix(2, 2)));
+
+    marker.transformation = makeMatRows(
+        rM.data[0], rM.data[1], rM.data[2], tV.data[X],
+        rM.data[3], rM.data[4], rM.data[5], tV.data[Y],
+        rM.data[6], rM.data[7], rM.data[8], tV.data[Z],
+        0.0f, 0.0f, 0.0f, 1.0f
+    );
 }
 
 /**

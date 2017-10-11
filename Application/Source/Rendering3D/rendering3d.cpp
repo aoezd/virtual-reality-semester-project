@@ -21,13 +21,58 @@ std::vector<Marker> dm;
  */
 void drawAR(void)
 {
-    if (dm.size() > 0)
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(makePerspective(cc.cameraMatrix.at<float>(0, 0),
+                                  cc.cameraMatrix.at<float>(1, 1),
+                                  cc.cameraMatrix.at<float>(0, 2),
+                                  cc.cameraMatrix.at<float>(1, 2),
+                                  CAMERA_WIDTH, CAMERA_HEIGHT,
+                                  0.01f, 100.0f)
+                      .data);
+    glMatrixMode(GL_PROJECTION);
+    // WIESO DAS UND NICHT EINFACH DIE ORTHOGONALE PROJEKTION?????
+    glLoadMatrixf(makeOrthographic(bg.cols, bg.rows).data);
+    glMatrixMode(GL_MODELVIEW);
+
+    for (Marker &m : dm)
     {
+        glLoadIdentity();
+        // glLoadMatrixf(m.transformation.data);
+
+        /*static float lineX[] = {0, 0, 0, 1, 0, 0};
+        static float lineY[] = {0, 0, 0, 0, 1, 0};
+        static float lineZ[] = {0, 0, 0, 0, 0, 1};*/
+
+        glLineWidth(2);
+
+        /* glBegin(GL_LINES);
+
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glVertex3fv(lineX);
+        glVertex3fv(lineX + 3);
+
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3fv(lineY);
+        glVertex3fv(lineY + 3);
+
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3fv(lineZ);
+        glVertex3fv(lineZ + 3);
+
+        glEnd();*/
+
+        glBegin(GL_QUADS);
+        glColor3f(0.0f, 1.0f, 1.0f);
+        glVertex2f(static_cast<float>(bg.cols), 0.0f);
+        glVertex2f(static_cast<float>(bg.cols), static_cast<float>(bg.rows));
+        glVertex2f(0.0f, static_cast<float>(bg.rows));
+        glEnd();
     }
 }
 
 /**
- *
+ * Creates a texture out of the current frame and
+ * renders it on a plain 2D plane on the framebuffer.
  */
 void drawBackground(void)
 {
@@ -43,13 +88,11 @@ void drawBackground(void)
     const GLfloat bgTexels[] = {1, 0, 1, 1, 0, 0, 0, 1};
 
     glMatrixMode(GL_PROJECTION);
-    // WIESO DAS UND NICHT EINFACH DIE ORTHOGONALE PROJEKTION?????
     glLoadMatrixf(makeOrthographic(bg.cols, bg.rows).data);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // Update attribute values.
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
@@ -66,29 +109,35 @@ void drawBackground(void)
 }
 
 /**
- *
+ * Draw callback for OpenGL.
  */
 void drawCallback(void *)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawBackground();
-    drawAR();
+    // drawAR();
 }
 
 /**
+ * Initializes the OpenGL context.
  * 
+ * @param windowName        Name of the window
+ * @param cameraCalibration Settings of current camera calibration
+ * @return                  true, if initialization was successful
  */
 bool initializeGL(const std::string &windowName, const CameraCalibration &cameraCalibration)
 {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glViewport(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 
-    cv::namedWindow(windowName, cv::WINDOW_OPENGL);
+    // Must be both flags since only OpenGL collides with GUI lib cvui
+    cv::namedWindow(windowName, cv::WINDOW_OPENGL | CV_WINDOW_AUTOSIZE);
     cv::resizeWindow(windowName, CAMERA_WIDTH, CAMERA_HEIGHT);
     cv::setOpenGlContext(windowName);
     cv::setOpenGlDrawCallback(windowName, drawCallback, 0);
@@ -99,7 +148,11 @@ bool initializeGL(const std::string &windowName, const CameraCalibration &camera
 }
 
 /**
+ * Updates the framebuffer and starts a new draw call.
  * 
+ * @param windowName        Name of the window in which will be rendered
+ * @param frame             Processed frame of camera
+ * @param detectedMarkers   In the scene detected markers
  */
 void updateWindowGL(const std::string &windowName, const cv::Mat &frame, const std::vector<Marker> &detectedMarkers)
 {
