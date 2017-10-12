@@ -370,33 +370,60 @@ bool getValidMarkersInFrame(Application &app, const cv::Mat &source, cv::Mat &re
  */
 void estimatePosition(Marker &marker, const CameraCalibration &cc)
 {
-    cv::Mat rotationVector;
-    cv::Mat_<float> translationVector;
     cv::Mat raux, taux;
 
     cv::solvePnP(getMarker3DPoints(cc.markerRealEdgeLength), marker.points, cc.cameraMatrix, cc.distanceCoefficients, raux, taux);
 
-    raux.convertTo(rotationVector, CV_32F);
-    taux.convertTo(translationVector, CV_32F);
+    raux.convertTo(marker.rotationVector, CV_32F);
+    taux.convertTo(marker.translationVector, CV_32F);
 
     // Get rotation matrix from rotation vector
     cv::Mat_<float> rotationMatrix(3, 3);
-    cv::Rodrigues(rotationVector, rotationMatrix);
+    cv::Rodrigues(marker.rotationVector, rotationMatrix);
 
-    // Copy rotation matrix and translation vector to marker
-    // Since solvePnP finds camera location with regard to marker pose -> to get marker pose with regard to the camera we invert it
-    Vec3 tV = neg(makeVec(translationVector(0), translationVector(1), translationVector(2)));
-    Mat3 rM = inv(makeMatRows(
-        rotationMatrix(0, 0), rotationMatrix(0, 1), rotationMatrix(0, 2),
-        rotationMatrix(1, 0), rotationMatrix(1, 1), rotationMatrix(1, 2),
-        rotationMatrix(2, 0), rotationMatrix(2, 1), rotationMatrix(2, 2)));
-
+    // Erst einfach erzeugen
+    // Rota-  Tx
+    // tions- Ty
+    // matrix Tz
+    // 0 0 0  1
     marker.transformation = makeMatRows(
-        rM.data[0], rM.data[1], rM.data[2], tV.data[X],
-        rM.data[3], rM.data[4], rM.data[5], tV.data[Y],
-        rM.data[6], rM.data[7], rM.data[8], tV.data[Z],
-        0.0f, 0.0f, 0.0f, 1.0f
-    );
+        rotationMatrix(0, 0), rotationMatrix(0, 1), rotationMatrix(0, 2), marker.translationVector(0),
+        rotationMatrix(1, 0), rotationMatrix(1, 1), rotationMatrix(1, 2), marker.translationVector(1),
+        rotationMatrix(2, 0), rotationMatrix(2, 1), rotationMatrix(2, 2), marker.translationVector(2),
+        0.0f, 0.0f, 0.0f, 1.0f);
+
+    // Dann invertieren, da wir es in die andere Richtung benötigen. Benötigen also die Marker pose bezüglich der camera, also punkte im camera oder viewspace
+    marker.transformation = inv(marker.transformation);
+
+    // Wegen unterschiedlicher ausrichtiungegn der kameras in den libs muss y und z umgekehrt also - werden
+    marker.transformation.data[5] = -marker.transformation.data[5];
+    marker.transformation.data[7] = -marker.transformation.data[7];
+    marker.transformation.data[10] = -marker.transformation.data[10];
+    marker.transformation.data[11] = -marker.transformation.data[11];
+
+    // ---------------------------------
+    cv::Mat viewMatrix = cv::Mat::zeros(4, 4, CV_64F);
+    for (unsigned int row = 0; row < 3; ++row)
+    {
+        for (unsigned int col = 0; col < 3; ++col)
+        {
+            viewMatrix.at<double>(row, col) = rotationMatrix.at<double>(row, col);
+        }
+        viewMatrix.at<double>(row, 3) = marker.translationVector.at<double>(row, 0);
+    }
+    viewMatrix.at<double>(3, 3) = 1.0f;
+    cv::Mat cvToGl = cv::Mat::zeros(4, 4, CV_64F);
+    cvToGl.at<double>(0, 0) = 1.0f;
+    cvToGl.at<double>(1, 1) = -1.0f; // Invert the y axis
+    cvToGl.at<double>(2, 2) = -1.0f; // invert the z axis
+    cvToGl.at<double>(3, 3) = 1.0f;
+    viewMatrix = cvToGl * viewMatrix;
+    cv::transpose(viewMatrix , marker.transformation1);
+
+    /*
+    std::cout << "-----------------------------------" << std::endl;
+    std::cout << marker.transformation1 << std::endl;
+    printMat(marker.transformation); */
 }
 
 /**
@@ -412,6 +439,9 @@ void processFrame(const cv::Mat &source, cv::Mat &result, Application &app, cons
         for (size_t i = 0; i < detectedMarkers.size(); i++)
         {
             estimatePosition(detectedMarkers[i], cc);
+
+            // Draw axis on marker for testing purpose
+            drawAxis(result, cc, detectedMarkers[i].rotationVector, detectedMarkers[i].translationVector);
         }
     }
 }

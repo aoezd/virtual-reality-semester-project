@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <cfloat>
+#include <opencv2/calib3d.hpp>
 
 #include "../../Header/Utilities/utils.h"
 
@@ -351,4 +352,21 @@ void drawCornerDots(const std::vector<cv::Point2f> &polygon, cv::Mat &image)
             cv::circle(image, polygon[i], 2, cv::Scalar(0, 255, 0), 2);
         }
     }
+}
+
+void drawAxis(cv::Mat &result, const CameraCalibration &cc, cv::Mat rotationVector, cv::Mat translationVector)
+{
+        std::vector<cv::Point3f> axisPoints;
+        std::vector<cv::Point2f> imagePoints;
+
+        axisPoints.push_back(cv::Point3f(0, 0, 0));
+        axisPoints.push_back(cv::Point3f(cc.markerRealEdgeLength * -0.5f, 0, 0));
+        axisPoints.push_back(cv::Point3f(0, cc.markerRealEdgeLength * -0.5f, 0));
+        axisPoints.push_back(cv::Point3f(0, 0, cc.markerRealEdgeLength * -0.5f));
+
+        cv::projectPoints(axisPoints, rotationVector, translationVector, cc.cameraMatrix, cc.distanceCoefficients, imagePoints);
+
+        line(result, imagePoints[0], imagePoints[1], cv::Scalar(0, 0, 255), 3);
+        line(result, imagePoints[0], imagePoints[2], cv::Scalar(0, 255, 0), 3);
+        line(result, imagePoints[0], imagePoints[3], cv::Scalar(255, 0, 0), 3);
 }

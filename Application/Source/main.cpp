@@ -31,7 +31,7 @@ const std::string LOGGING_NAME = "main.cpp";
 bool evaluateUserInput(char key)
 {
   // Abort application
-  if (key != ESC && key != _Q && key != _q)
+  if (key == ESC)
   {
     return false;
   }
@@ -74,9 +74,10 @@ void startProcessing(Application app, CameraCalibration cc)
     {
       std::vector<Marker> detectedMarkers;
       frame.copyTo(result);
-      processFrame(frame, result, app, cc, detectedMarkers);
+      processFrame(frame, result, app, cc, detectedMarkers);      
       GUI(result, app, fps);
       updateWindowGL(WINDOW, result, detectedMarkers);
+      cv::imshow(WINDOW, result);
       key = (char)cv::waitKey(5);
     }
     else
@@ -85,7 +86,7 @@ void startProcessing(Application app, CameraCalibration cc)
     }
 
     computeFPS(frameCounter, start, tick, fps);
-  } while evaluateUserInput(key);
+  } while (evaluateUserInput(key));
 }
 
 /**
@@ -134,13 +135,13 @@ int main(int argc, char *argv[])
           logError(LOGGING_NAME, "Couldn't initialize GL context.");
           err++;
         }
+        releaseCamera();
       }
       else
       {
         logError(LOGGING_NAME, "Couldn't initialize (default) camera or calibrate it.");
         err++;
       }
-      releaseCamera();
     }
     else
     {

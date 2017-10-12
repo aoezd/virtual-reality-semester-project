@@ -130,7 +130,7 @@ Mat4 makeOrthographic(const float &left, const float &right, const float &top, c
 Mat4 makeLookAt(const Vec3 &center, const Vec3 &lookAt, const Vec3 &up);
 
 // --------------- OpenCV Matrices ---------------
-Mat4 makeOrthographic(int w, int h);
+Mat4 makeOrthographic(const int &w, const int &h);
 Mat4 makePerspective(const float &fx, const float &fy, const float &cx, const float &cy, const int &w, const int &h, const float &near, const float &far);
 
 #endif

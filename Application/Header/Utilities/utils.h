@@ -13,11 +13,11 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "../ImageDetection/camera.h"
+
 #define ESC 27
 #define SPACE 32
 #define ENTER 13
-#define _q 113
-#define _Q 81
 
 typedef struct
 {
@@ -64,5 +64,6 @@ unsigned clampUint(const unsigned &x, const unsigned &min, const unsigned &max);
 
 // --------------- Drawing Stuff ---------------
 void drawCornerDots(const std::vector<cv::Point2f> &polygon, cv::Mat &image);
+void drawAxis(cv::Mat &result, const CameraCalibration &cc, cv::Mat rotationVector, cv::Mat translationVector);
 
 #endif

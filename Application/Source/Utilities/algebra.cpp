@@ -762,18 +762,20 @@ Mat4 makeLookAt(const Vec3 &center, const Vec3 &lookAt, const Vec3 &up)
 
 // --------------- OpenCV Matrices ---------------
 
-Mat4 makeOrthographic(int w, int h)
+Mat4 makeOrthographic(const int &w, const int &h)
 {
-    return makeMatRows(0.0f, -2.0f / static_cast<float>(w), 0.0f, 0.0f,
-                       -2.0f / static_cast<float>(h), 0.0f, 0.0f, 0.0f,
-                       0.0f, 0.0f, 1.0f, 0.0f,
-                       1.0f, 1.0f, 0.0f, 1.0f);
+    return makeMatRows(
+        0.0f, -2.0f / static_cast<float>(w), 0.0f, 0.0f,
+        -2.0f / static_cast<float>(h), 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 0.0f, 1.0f);
 }
 
 Mat4 makePerspective(const float &fx, const float &fy, const float &cx, const float &cy, const int &w, const int &h, const float &near, const float &far)
 {
-    return makeMatRows(-2.0f * fx / w, 0.0f, 2.0f * cx / w - 1.0f, 0.0f,
-                       0.0f, 2.0f * fy / h, 2.0f * cy / h - 1.0f, 0.0f,
-                       0.0f, 0.0f, -(far + near) / (far - near), -2.0f * far * near / (far - near),
-                       0.0f, 0.0f, -1.0f, 1.0f);
+    return makeMatRows(
+        -2.0f * fx / w, 0.0f, 0.0f, 0.0f,
+        0.0f, 2.0f * fy / h, 0.0f, 0.0f,
+        2.0f * cx / w - 1.0f, 2.0f * cy / h - 1.0f, (-far - near) / (far - near), -1.0f,
+        0.0f, 0.0f, -2.0f * far * near / (far - near), 0.0f);
 }
