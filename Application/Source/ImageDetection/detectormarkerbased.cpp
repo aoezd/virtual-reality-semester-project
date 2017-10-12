@@ -441,7 +441,7 @@ void processFrame(const cv::Mat &source, cv::Mat &result, Application &app, cons
             estimatePosition(detectedMarkers[i], cc);
 
             // Draw axis on marker for testing purpose
-            drawAxis(result, cc, detectedMarkers[i].rotationVector, detectedMarkers[i].translationVector);
+            // drawAxis(result, cc, detectedMarkers[i].rotationVector, detectedMarkers[i].translationVector);
         }
     }
 }

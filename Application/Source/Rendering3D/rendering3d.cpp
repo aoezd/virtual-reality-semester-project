@@ -39,8 +39,8 @@ void drawAR(void)
 
     for (size_t i = 0; i < dm.size(); i++)
     {
-        // glLoadMatrixf(dm[i].transformation.data);
-        glLoadMatrixd(&dm[i].transformation1.at<double>(0, 0));
+        glLoadMatrixf(dm[i].transformation.data);
+        // glLoadMatrixd(&dm[i].transformation1.at<double>(0, 0));
 
         glLineWidth(2);
 

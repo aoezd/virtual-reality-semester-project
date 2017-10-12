@@ -77,7 +77,7 @@ void startProcessing(Application app, CameraCalibration cc)
       processFrame(frame, result, app, cc, detectedMarkers);      
       GUI(result, app, fps);
       updateWindowGL(WINDOW, result, detectedMarkers);
-      cv::imshow(WINDOW, result);
+      // cv::imshow(WINDOW, result);
       key = (char)cv::waitKey(5);
     }
     else
