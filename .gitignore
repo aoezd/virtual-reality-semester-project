@@ -37,6 +37,7 @@ mb-ar-app
 testsuite
 
 # Resources
+/Application/Resources
 /Application/Images/CameraCalibration
 
 .depend
