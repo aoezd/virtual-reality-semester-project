@@ -11,10 +11,15 @@
 
 #include "../../Header/Rendering3D/rendering3d.h"
 
+#define TIMER_CALLS_PS 60
+
 cv::Mat bg;
 unsigned int bgTexId;
 CameraCalibration cc;
 std::vector<Marker> dm;
+GLUquadricObj *quad;
+double intervalLast;
+double intervalRotation;
 
 void drawCoordinateAxis()
 {
@@ -39,6 +44,127 @@ void drawCoordinateAxis()
     glVertex3fv(lineZ + 3);
 
     glEnd();
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
+void drawSquare()
+{
+    glBegin(GL_QUADS);
+    {
+        glVertex3f(cc.markerRealEdgeLength / 2.0f, cc.markerRealEdgeLength / 2.0f, 0.0f);
+        glVertex3f(-cc.markerRealEdgeLength / 2.0f, cc.markerRealEdgeLength / 2.0f, 0.0f);
+        glVertex3f(-cc.markerRealEdgeLength / 2.0f, -cc.markerRealEdgeLength / 2.0f, 0.0f);
+        glVertex3f(cc.markerRealEdgeLength / 2.0f, -cc.markerRealEdgeLength / 2.0f, 0.0f);
+    }
+    glEnd();
+}
+
+void drawObstacle()
+{
+    glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+
+    glPushMatrix();
+    glRotatef(intervalRotation * 1.5f, 0.0f, 0.0f, 1.0f);
+    glTranslatef(0.0f, 0.0f, cc.markerRealEdgeLength / 2.0f);
+
+    glPushMatrix();
+    glScalef(2.5f, 0.15f, 0.15f);
+
+    // Top
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, cc.markerRealEdgeLength);
+    drawSquare();
+    glPopMatrix();
+
+    // Bottom
+    glPushMatrix();
+    glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
+    drawSquare();
+    glPopMatrix();
+
+    // Left
+    glPushMatrix();
+    glTranslatef(-cc.markerRealEdgeLength / 2.0f, 0.0f, cc.markerRealEdgeLength / 2.0f);
+    glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+    drawSquare();
+    glPopMatrix();
+
+    // Right
+    glPushMatrix();
+    glTranslatef(cc.markerRealEdgeLength / 2.0f, 0.0f, cc.markerRealEdgeLength / 2.0f);
+    glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+    drawSquare();
+    glPopMatrix();
+
+    // Front
+    glPushMatrix();
+    glTranslatef(0.0f, cc.markerRealEdgeLength / 2.0f, cc.markerRealEdgeLength / 2.0f);
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    drawSquare();
+    glPopMatrix();
+
+    // Back
+    glPushMatrix();
+    glTranslatef(0.0f, -cc.markerRealEdgeLength / 2.0f, cc.markerRealEdgeLength / 2.0f);
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+    drawSquare();
+    glPopMatrix();
+
+    glPopMatrix();
+
+    glPopMatrix();
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
+void drawBall()
+{
+    float ballRadius = cc.markerRealEdgeLength / 3.0f;
+
+    glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, ballRadius);
+    gluSphere(quad, ballRadius, 20, 20);
+    glPopMatrix();
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
+void drawCoin()
+{
+    float coinHeight = cc.markerRealEdgeLength / 10.0f;
+    float coinRadius = cc.markerRealEdgeLength / 3.0f;
+
+    glPushMatrix();
+    glRotatef(intervalRotation, 0.0f, 0.0f, 1.0f);
+
+    glPushMatrix();
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+    glTranslatef(0.0f, cc.markerRealEdgeLength / 2.0f, -coinHeight / 2.0f);
+
+    // Cylinder
+    glColor4f(0.95f, 0.7f, 0.25f, 1.0f);
+    gluCylinder(quad, coinRadius, coinRadius, coinHeight, 20, 10);
+
+    // Front plane
+    glColor4f(0.95f, 0.9f, 0.25f, 1.0f);
+    glPushMatrix();
+    {
+        glTranslatef(0.0f, 0.0f, coinHeight);
+        gluDisk(quad, 0.0f, cc.markerRealEdgeLength / 3.0f, 20, 20);
+    }
+    glPopMatrix();
+
+    // Back plane
+    glPushMatrix();
+    {
+        glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+        gluDisk(quad, 0.0f, cc.markerRealEdgeLength / 3.0f, 20, 20);
+    }
+    glPopMatrix();
+
+    glPopMatrix();
+
+    glPopMatrix();
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 /**
@@ -63,10 +189,20 @@ void drawAR(void)
         for (size_t i = 0; i < dm.size(); i++)
         {
             // Set the pattern transformation
-            glLoadMatrixf(&dm[0].transformation.data[0]);
+            glLoadMatrixf(&dm[i].transformation.data[0]);
 
-            // Render model
-            drawCoordinateAxis();
+            if (dm[i].type == MARKER_TYPE_COIN)
+            {
+                drawCoin();
+            }
+            else if (dm[i].type == MARKER_TYPE_OBSTACLE)
+            {
+                drawObstacle();
+            }
+            else if (dm[i].type == MARKER_TYPE_PLAYER)
+            {
+                drawBall();
+            }
         }
     }
 }
@@ -114,7 +250,13 @@ void drawBackground(void)
  */
 void drawCallback(void *)
 {
+    intervalRotation += (glutGet(GLUT_ELAPSED_TIME) - intervalLast) / 10.0f;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+
     drawBackground();
     drawAR();
 }
@@ -132,9 +274,6 @@ bool initializeGL(const std::string &windowName, const CameraCalibration &camera
     glDepthFunc(GL_LESS);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
     glViewport(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 
     // Must be both flags since only OpenGL collides with GUI lib cvui
@@ -142,10 +281,22 @@ bool initializeGL(const std::string &windowName, const CameraCalibration &camera
     cv::resizeWindow(windowName, CAMERA_WIDTH, CAMERA_HEIGHT);
     cv::setOpenGlContext(windowName);
     cv::setOpenGlDrawCallback(windowName, drawCallback, 0);
+    intervalLast = glutGet(GLUT_ELAPSED_TIME);
 
     cc = cameraCalibration;
 
+    quad = gluNewQuadric();
+    gluQuadricTexture(quad, GL_TRUE);
+
     return glGetError() == GL_NO_ERROR;
+}
+
+/**
+ * Cleans up GL related stuff
+ */
+void releaseGL(void)
+{
+    gluDeleteQuadric(quad);
 }
 
 /**
@@ -160,4 +311,5 @@ void updateWindowGL(const std::string &windowName, const cv::Mat &frame, const s
     frame.copyTo(bg);
     dm = detectedMarkers;
     cv::updateWindow(windowName);
+    intervalLast = glutGet(GLUT_ELAPSED_TIME);
 }

@@ -7,6 +7,7 @@
 #include "../../Header/ImageDetection/detectormarkerbased.h"
 
 bool initializeGL(const std::string &windowName, const CameraCalibration &cameraCalibration);
+void releaseGL(void);
 void updateWindowGL(const std::string &windowName, const cv::Mat &frame, const std::vector<Marker> &detectedMarkers);
 
 #endif

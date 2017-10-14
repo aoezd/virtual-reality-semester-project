@@ -20,28 +20,31 @@ const std::string LOGGING_NAME = "argparse.cpp";
 /**
  *
  */
-int parseArg(int argc, std::vector<std::string> argv, cv::Mat &markerImage, std::vector<cv::Mat> &calibrationImages, CameraCalibration &cc)
+int parseArg(int argc, std::vector<std::string> argv, std::map<std::string, cv::Mat> &markerImages, std::vector<cv::Mat> &calibrationImages, CameraCalibration &cc)
 {
     int i = 0;
+    cv::Mat marker;
 
     while (i < argc)
     {
         std::string param = argv.at(i);
 
-        // -m
-        if (equal(param, MARKER))
+        // -m{c, o, p}
+        if (equal(param, MARKER_COIN))
         {
-            if (!loadImage(markerImage, argv.at(i + 1)))
+            if (!loadImage(marker, argv.at(i + 1)))
             {
-                logError(LOGGING_NAME, "Couldn't load marker image at path " + argv.at(i + 1) + ".");
+                logError(LOGGING_NAME, "Couldn't load " + param + " image at path " + argv.at(i + 1) + ".");
                 return 1;
             }
 
-            if (markerImage.rows != markerImage.cols)
+            if (marker.rows != marker.cols)
             {
-                logError(LOGGING_NAME, "Marker image must be a square.");
+                logError(LOGGING_NAME, param + " image must be a square.");
                 return 1;
             }
+
+            marker.copyTo(markerImages[param]);
         }
 
         // -ccc

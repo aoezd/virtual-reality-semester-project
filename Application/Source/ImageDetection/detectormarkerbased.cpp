@@ -16,12 +16,13 @@
 #include "../../Header/ImageDetection/detectormarkerbased.h"
 #include "../../Header/Logging/logger.h"
 #include "../../Header/Utilities/algebra.h"
+#include "../../Header/Utilities/argparse.h"
 
 const std::string LOGGING_NAME = "detectormarkerbased.cpp";
 
 /** Actual marker which will be searched in the given camera frame */
 // TODO: MORE THAN ONE MARKER!!!!
-Marker defaultMarker;
+std::vector<Marker> defaultMarkers;
 
 /**
  * Provides depending on the real edge length of a Marker corresponding points in 3D model space.
@@ -117,27 +118,45 @@ bool hasBlackBorder(const cv::Mat &threshold, const float &percentage)
 }
 
 /**
+ * Converts a default marker image to a marker type.
+ * 
+ * @param app           Settings of application
+ * @param type          Type of marker image
+ * @param markerImage   The actually image of marker
+ * @return              true, if given image has a black border, like a marker would do
+ */
+bool saveDefaultMarker(const Application &app, const unsigned int &type, const cv::Mat &markerImage)
+{
+    Marker marker;
+
+    marker.image = markerImage;
+    marker.bitMask = computeBitMask(markerImage, app.percentageBitMask); // no threshold because default marker is binary
+    marker.id = computeId(marker.bitMask);
+    marker.rotationCount = 0;
+    marker.type = type;
+
+    defaultMarkers.push_back(marker);
+
+    return hasBlackBorder(markerImage, app.percentageBlackBorder);
+}
+
+/**
  * Initializes the marker detector with all markers which will be search in a given frame.
  * The image of an marker must be a square.
  *
- * @param markerImage   Image of marker
  * @param app           Settings of application
+ * @param markerImages  Map of all images of marker types
  * @return              true, if initialization was successful
  */
-bool initializeDetectorMarkerBased(const Application &app, const cv::Mat &markerImage)
+bool initializeDetectorMarkerBased(const Application &app, const std::map<std::string, cv::Mat> &markerImages)
 {
-    if (markerImage.rows != markerImage.cols)
-    {
-        logError(LOGGING_NAME, "Marker image is not a square.");
-        return false;
-    }
+    bool err = false;
 
-    defaultMarker.image = markerImage;
-    defaultMarker.bitMask = computeBitMask(markerImage, app.percentageBitMask); // no threshold because default marker is binary
-    defaultMarker.id = computeId(defaultMarker.bitMask);
-    defaultMarker.rotationCount = 0;
+    err = saveDefaultMarker(app, MARKER_TYPE_COIN, markerImages.at(MARKER_COIN));
+    err &= saveDefaultMarker(app, MARKER_TYPE_OBSTACLE, markerImages.at(MARKER_OBSTACLE));
+    err &= saveDefaultMarker(app, MARKER_TYPE_PLAYER, markerImages.at(MARKER_PLAYER));
 
-    return hasBlackBorder(markerImage, app.percentageBlackBorder);
+    return err;
 }
 
 /**
@@ -284,13 +303,32 @@ bool isValidMarker(Marker &marker)
 
     do
     {
+        bool valid = false;
         uint64_t id = computeId(bitMask);
-        if (id == defaultMarker.id)
+
+        if (id == defaultMarkers[MARKER_TYPE_COIN].id)
+        {
+            marker.type = MARKER_TYPE_COIN;
+            valid = true;
+        }
+        else if (id == defaultMarkers[MARKER_TYPE_OBSTACLE].id)
+        {
+            marker.type = MARKER_TYPE_OBSTACLE;
+            valid = true;
+        }
+        else if (id == defaultMarkers[MARKER_TYPE_PLAYER].id)
+        {
+            marker.type = MARKER_TYPE_PLAYER;
+            valid = true;
+        }
+
+        if (valid)
         {
             marker.rotationCount = rotationCount;
             marker.id = id;
             return true;
         }
+
         bitMask = rotate90deg(bitMask, false);
         rotationCount++;
     } while (rotationCount < 4);
@@ -333,8 +371,8 @@ bool getValidMarkersInFrame(Application &app, const cv::Mat &source, cv::Mat &re
             cv::warpPerspective(grayscale,
                                 marker.image,
                                 cv::getPerspectiveTransform(convertVP_VP2f(quad), // getPerspectiveTransform needs Point2f
-                                                            getCornerPoints2f(defaultMarker.image)),
-                                defaultMarker.image.size());
+                                                            getCornerPoints2f(defaultMarkers[MARKER_TYPE_COIN].image)),
+                                defaultMarkers[MARKER_TYPE_COIN].image.size());
 
             // Compute bitmask and id of marker
             cv::Mat thresholdMarker;
@@ -402,12 +440,7 @@ void processFrame(const cv::Mat &source, cv::Mat &result, Application &app, cons
     if (getValidMarkersInFrame(app, source, result, detectedMarkers))
     {
         // Estimate all positions of marker and save corresponding transformation matrix
-        for (size_t i = 0; i < detectedMarkers.size(); i++)
-        {
-            estimatePosition(detectedMarkers[i], cc);
-
-            // Draw axis on marker for testing purpose
-            // drawAxis(result, cc, detectedMarkers[i].rotationVector, detectedMarkers[i].translationVector);
-        }
+        for (Marker &marker : detectedMarkers)
+            estimatePosition(marker, cc);
     }
 }
