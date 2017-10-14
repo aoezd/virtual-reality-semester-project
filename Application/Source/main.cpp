@@ -20,6 +20,10 @@
 
 #define WINDOW "Markerbased AR Application"
 
+const int MIN_CONTOUR_POINTS_ALLOWED = 50;
+const int MIN_SIDE_EDGE_LENGTH = 5000;
+const float PERCENTAGE_BIT_MASK = 0.4f;
+const float PERCENTAGE_BLACK_BORDER = 0.5f;
 const std::string LOGGING_NAME = "main.cpp";
 
 /**
@@ -74,10 +78,9 @@ void startProcessing(Application app, CameraCalibration cc)
     {
       std::vector<Marker> detectedMarkers;
       frame.copyTo(result);
-      processFrame(frame, result, app, cc, detectedMarkers);      
+      processFrame(frame, result, app, cc, detectedMarkers);
       GUI(result, app, fps);
       updateWindowGL(WINDOW, result, detectedMarkers);
-      // cv::imshow(WINDOW, result);
       key = (char)cv::waitKey(5);
     }
     else
@@ -106,6 +109,7 @@ int main(int argc, char *argv[])
     cv::Mat sourceImage,
         markerImage;
     std::string out;
+    Application app;
     std::vector<cv::Mat> calibrationImages;
     std::vector<std::string> arg(argv + 1, argv + argc);
     CameraCalibration cc;
@@ -118,8 +122,12 @@ int main(int argc, char *argv[])
       {
         if (initializeGL(WINDOW, cc))
         {
-          Application app;
-          initializeGUI(WINDOW, app);
+          app.minContourPointsAllowed = MIN_CONTOUR_POINTS_ALLOWED;
+          app.minSideEdgeLength = MIN_SIDE_EDGE_LENGTH;
+          app.percentageBitMask = PERCENTAGE_BIT_MASK;
+          app.percentageBlackBorder = PERCENTAGE_BLACK_BORDER;
+          initializeGUI(WINDOW);
+
           if (initializeDetectorMarkerBased(app, markerImage))
           {
             startProcessing(app, cc);

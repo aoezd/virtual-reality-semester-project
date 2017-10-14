@@ -16,49 +16,58 @@ unsigned int bgTexId;
 CameraCalibration cc;
 std::vector<Marker> dm;
 
+void drawCoordinateAxis()
+{
+    static float lineX[] = {0, 0, 0, cc.markerRealEdgeLength / 2, 0, 0};
+    static float lineY[] = {0, 0, 0, 0, cc.markerRealEdgeLength / 2, 0};
+    static float lineZ[] = {0, 0, 0, 0, 0, cc.markerRealEdgeLength / 2};
+
+    glLineWidth(2);
+
+    glBegin(GL_LINES);
+
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glVertex3fv(lineX);
+    glVertex3fv(lineX + 3);
+
+    glColor3f(0.0f, 1.0f, 0.0f);
+    glVertex3fv(lineY);
+    glVertex3fv(lineY + 3);
+
+    glColor3f(0.0f, 0.0f, 1.0f);
+    glVertex3fv(lineZ);
+    glVertex3fv(lineZ + 3);
+
+    glEnd();
+}
+
 /**
  * 
  */
 void drawAR(void)
 {
-    static float lineX[] = {0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
-    static float lineY[] = {0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
-    static float lineZ[] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
-
     glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(makePerspective(cc.cameraMatrix.at<float>(0, 0),
-                                  cc.cameraMatrix.at<float>(1, 1),
-                                  cc.cameraMatrix.at<float>(0, 2),
-                                  cc.cameraMatrix.at<float>(1, 2),
+    glLoadMatrixf(makePerspective(cc.cameraMatrix.at<double>(0, 0),
+                                  cc.cameraMatrix.at<double>(1, 1),
+                                  cc.cameraMatrix.at<double>(0, 2),
+                                  cc.cameraMatrix.at<double>(1, 2),
                                   CAMERA_WIDTH, CAMERA_HEIGHT,
-                                  0.1f, 100.0f)
+                                  0.1f, 10000.0f)
                       .data);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    for (size_t i = 0; i < dm.size(); i++)
+    if (dm.size() > 0)
     {
-        glLoadMatrixf(dm[i].transformation.data);
-        // glLoadMatrixd(&dm[i].transformation1.at<double>(0, 0));
+        for (size_t i = 0; i < dm.size(); i++)
+        {
+            // Set the pattern transformation
+            glLoadMatrixf(&dm[0].transformation.data[0]);
 
-        glLineWidth(2);
-
-        glBegin(GL_LINES);
-
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3fv(lineX);
-        glVertex3fv(lineX + 3);
-
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3fv(lineY);
-        glVertex3fv(lineY + 3);
-
-        glColor3f(0.0f, 0.0f, 1.0f);
-        glVertex3fv(lineZ);
-        glVertex3fv(lineZ + 3);
-
-        glEnd();
+            // Render model
+            drawCoordinateAxis();
+        }
     }
 }
 
@@ -106,7 +115,7 @@ void drawBackground(void)
 void drawCallback(void *)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // drawBackground();
+    drawBackground();
     drawAR();
 }
 

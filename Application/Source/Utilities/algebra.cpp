@@ -779,32 +779,3 @@ Mat4 makePerspective(const float &fx, const float &fy, const float &cx, const fl
         2.0f * cx / w - 1.0f, 2.0f * cy / h - 1.0f, (-far - near) / (far - near), -1.0f,
         0.0f, 0.0f, -2.0f * far * near / (far - near), 0.0f);
 }
-
-Mat4 makePerspective1(const float &fx, const float &fy, const float &cx, const float &cy, const int &w, const int &h, const float &near, const float &far)
-{
-    return makeMatRows(
-        2.0f * fx / w, 0.0f, 0.0f, 0.0f,
-        0.0f, -2.0f * fy / h, 0.0f, 0.0f,
-        1.0f - 2.0f * cx / w, 2.0f * cy / h - 1.0f, (far + near) / (near - far), -1.0f,
-        0.0f, 0.0f, 2.0f * far * near / (near - far), 0.0f);
-}
-
-Mat4 makePerspective2(const float &fx, const float &fy, const float &cx, const float &cy, const int &w, const int &h, const float &near, const float &far)
-{
-    Vec4 col1 = makeVec(-2.0f * fx / w, 0.0f, 0.0f, 0.0f);
-    Vec4 col2 = makeVec(0.0f, 2.0f * fy / h, 0.0f, 0.0f);
-    Vec4 col3 = makeVec(2.0f * cx / w - 1.0f, 2.0f * cy / h - 1.0f, (-far - near) / (far - near), -1.0f);
-    Vec4 col4 = makeVec(0.0f, 0.0f, -2.0f * far * near / (far - near), 0.0f);
-
-    return makeMatCols(col1, col2, col3, col4);
-}
-
-Mat4 makePerspective3(const float &fx, const float &fy, const float &cx, const float &cy, const int &w, const int &h, const float &near, const float &far)
-{
-    Vec4 col1 = makeVec(2.0f * fx / w, 0.0f, 0.0f, 0.0f);
-    Vec4 col2 = makeVec(0.0f, -2.0f * fy / h, 0.0f, 0.0f);
-    Vec4 col3 = makeVec(1.0f - 2.0f * cx / w, 2.0f * cy / h - 1.0f, (far + near) / (near - far), -1.0f);
-    Vec4 col4 = makeVec(0.0f, 0.0f, 2.0f * far * near / (near - far), 0.0f);
-
-    return makeMatCols(col1, col2, col3, col4);
-}

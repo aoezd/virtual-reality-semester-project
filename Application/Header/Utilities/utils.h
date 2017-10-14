@@ -23,7 +23,7 @@ typedef struct
 {
     int minContourPointsAllowed;
     int minSideEdgeLength;
-    int validMarkerCount;
+    int validMarkerCount = 0;
     float percentageBitMask;
     float percentageBlackBorder;
 } Application; // Defines settings of application

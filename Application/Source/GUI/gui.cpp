@@ -18,19 +18,6 @@ void initializeGUI(const cv::String &windowName)
 }
 
 /**
-  *
-  */
-void initializeGUI(const cv::String &windowName, Application &app)
-{
-    initializeGUI(windowName);
-    app.minContourPointsAllowed = 50;
-    app.minSideEdgeLength = 5000;
-    app.validMarkerCount = 0;
-    app.percentageBitMask = 0.4f;
-    app.percentageBlackBorder = 0.5f;
-}
-
-/**
  *
  */
 void GUI(cv::Mat &frame, Application &app, int fps)
