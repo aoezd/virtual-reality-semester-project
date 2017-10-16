@@ -194,12 +194,12 @@ bool startCameraCalibration(CameraCalibration &cc)
     cv::namedWindow(WINDOW, CV_WINDOW_AUTOSIZE);
     initializeGUI(WINDOW);
 
-    if (dirMake("./Images/CameraCalibration")) {
+    if (!dirExists("./Images/CameraCalibration") && dirMake("./Images/CameraCalibration")) {
         logError(LOGGING_NAME, "Couldn't create directory at './Images/CameraCalibration'.");
         return false;
     }
 
-    if (dirMake(DEFAULT_CC_FILEPATH)) {
+    if (!dirExists(DEFAULT_CC_FILEPATH) && dirMake(DEFAULT_CC_FILEPATH)) {
         logError(LOGGING_NAME, "Couldn't create directory at '" + DEFAULT_CC_FILEPATH + "'.");
         return false;
     }
