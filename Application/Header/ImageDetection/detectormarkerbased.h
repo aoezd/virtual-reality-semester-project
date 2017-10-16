@@ -24,10 +24,11 @@ typedef struct
     cv::Mat bitMask;
     std::vector<cv::Point2f> points;
     unsigned int type;
-    Mat4 transformation;
+    cv::Mat_<float> rotationMatrix;
+    cv::Mat_<float> translationVector;
 } Marker; // Defines a marker which must be detected in a frame
 
 bool initializeDetectorMarkerBased(const Application &app, const std::map<std::string, cv::Mat> &markerImages);
-void processFrame(const cv::Mat &source, cv::Mat &result, Application &app, const CameraCalibration &cc, std::vector<Marker> &detectedMarkers);
+void processMarkerDetection(std::vector<Marker> &detectedMarkers, cv::Mat &result, Application &app, const CameraCalibration &cameraCalibration);
 
 #endif

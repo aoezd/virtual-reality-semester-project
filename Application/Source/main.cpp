@@ -29,86 +29,24 @@ const float PERCENTAGE_BLACK_BORDER = 0.5f;
 const std::string LOGGING_NAME = "main.cpp";
 
 /**
- * Evaluates the pressed key by user and processes accordingly.
- * 
- * @param key Pressed key by user
- * @return    false, if application should be aborted
- */
-bool evaluateUserInput(char key)
-{
-  // Abort application
-  if (key == ESC)
-  {
-    return false;
-  }
-  return true;
-}
-
-/**
- * 
- */
-void computeFPS(int &frameCounter, const time_t &start, int &tick, int &fps)
-{
-  frameCounter++;
-  if ((time(0) - start) - tick >= 1)
-  {
-    tick++;
-    fps = frameCounter;
-    frameCounter = 0;
-  }
-}
-
-/**
- * Processing will be started if the application was correctfully executed.
- * For every frame coming from the camera will be given to the markerbased detector
- * and checked if valid marker are in the scene. Subsequently the processed frame
- * will be passed forward to the OpenGL context and will be rendered.
- * 
- * @param app Settings of the application
- * @param cc  Calibration settings of camera
- */
-void startProcessing(Application app, CameraCalibration cc)
-{
-  cv::Mat frame, result;
-  char key = 0;
-  int frameCounter = 0, tick = 0, fps;
-  time_t start = time(0);
-
-  do
-  {
-    if (getNextFrame(frame))
-    {
-      std::vector<Marker> detectedMarkers;
-      frame.copyTo(result);
-      processFrame(frame, result, app, cc, detectedMarkers);
-      GUI(result, app, fps);
-      updateWindowGL(WINDOW, result, detectedMarkers);
-      key = (char)cv::waitKey(5);
-    }
-    else
-    {
-      logWarn(LOGGING_NAME, "Frame of camera is empty.");
-    }
-
-    computeFPS(frameCounter, start, tick, fps);
-  } while (evaluateUserInput(key));
-}
-
-/**
  * Loads all default marker if one is not set.
  * 
  * @param markerImages  Map of all marker types
  */
-void loadDefaultMarker(std::map<std::string, cv::Mat> &markerImages) {
-  if (markerImages.find(MARKER_COIN) == markerImages.end() && !loadImage(markerImages[MARKER_COIN], MARKER_COIN_DEFAULT)) {
+void loadDefaultMarker(std::map<std::string, cv::Mat> &markerImages)
+{
+  if (markerImages.find(MARKER_COIN) == markerImages.end() && !loadImage(markerImages[MARKER_COIN], MARKER_COIN_DEFAULT))
+  {
     logWarn(LOGGING_NAME, "Couldn't load default marker coin image.");
   }
 
-  if (markerImages.find(MARKER_OBSTACLE) == markerImages.end() && !loadImage(markerImages[MARKER_OBSTACLE], MARKER_OBSTACLE_DEFAULT)) {
+  if (markerImages.find(MARKER_OBSTACLE) == markerImages.end() && !loadImage(markerImages[MARKER_OBSTACLE], MARKER_OBSTACLE_DEFAULT))
+  {
     logWarn(LOGGING_NAME, "Couldn't load default marker obstacle image.");
   }
 
-  if (markerImages.find(MARKER_PLAYER) == markerImages.end() && !loadImage(markerImages[MARKER_PLAYER], MARKER_PLAYER_DEFAULT)) {
+  if (markerImages.find(MARKER_PLAYER) == markerImages.end() && !loadImage(markerImages[MARKER_PLAYER], MARKER_PLAYER_DEFAULT))
+  {
     logWarn(LOGGING_NAME, "Couldn't load default marker player image.");
   }
 }
@@ -146,30 +84,24 @@ int main(int argc, char *argv[])
 
       if (initializeCamera(cc, calibrationImages))
       {
-        if (initializeGL(WINDOW, cc))
+        app.minContourPointsAllowed = MIN_CONTOUR_POINTS_ALLOWED;
+        app.minSideEdgeLength = MIN_SIDE_EDGE_LENGTH;
+        app.percentageBitMask = PERCENTAGE_BIT_MASK;
+        app.percentageBlackBorder = PERCENTAGE_BLACK_BORDER;
+        // initializeGUI(WINDOW);
+        if (initializeDetectorMarkerBased(app, markerImages))
         {
-          app.minContourPointsAllowed = MIN_CONTOUR_POINTS_ALLOWED;
-          app.minSideEdgeLength = MIN_SIDE_EDGE_LENGTH;
-          app.percentageBitMask = PERCENTAGE_BIT_MASK;
-          app.percentageBlackBorder = PERCENTAGE_BLACK_BORDER;
-          initializeGUI(WINDOW);
-          if (initializeDetectorMarkerBased(app, markerImages))
+          if (!initializeGL(WINDOW, app, cc))
           {
-            startProcessing(app, cc);
-          }
-          else
-          {
-            logError(LOGGING_NAME, "Couldn't initialize marker based detector.");
+            logError(LOGGING_NAME, "Couldn't initialize GL context.");
             err++;
           }
         }
         else
         {
-          logError(LOGGING_NAME, "Couldn't initialize GL context.");
+          logError(LOGGING_NAME, "Couldn't initialize marker based detector.");
           err++;
         }
-        releaseGL();
-        releaseCamera();
       }
       else
       {

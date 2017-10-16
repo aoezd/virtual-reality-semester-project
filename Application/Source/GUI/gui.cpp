@@ -14,6 +14,8 @@
   */
 void initializeGUI(const cv::String &windowName)
 {
+    cv::namedWindow(windowName, CV_WINDOW_AUTOSIZE);
+    cv::resizeWindow(windowName, CAMERA_WIDTH, CAMERA_HEIGHT);
     cvui::init(windowName, -1);
 }
 

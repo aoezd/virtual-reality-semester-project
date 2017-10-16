@@ -6,21 +6,28 @@
  * Author: Aykut Özdemir
  */
 
+#include <iostream>
 #include <GL/glut.h>
 #include <opencv2/highgui.hpp>
 
 #include "../../Header/Rendering3D/rendering3d.h"
+#include "../../Header/ImageDetection/camera.h"
 
 #define TIMER_CALLS_PS 60
 
 cv::Mat bg;
-unsigned int bgTexId;
-CameraCalibration cc;
 std::vector<Marker> dm;
+unsigned int bgTexId;
+Application app;
+CameraCalibration cc;
 GLUquadricObj *quad;
-double intervalLast;
+double interval;
 double intervalRotation;
+Vec2 playerTranslation;
 
+/**
+ * 
+ */
 void drawCoordinateAxis()
 {
     static float lineX[] = {0, 0, 0, cc.markerRealEdgeLength / 2, 0, 0};
@@ -47,6 +54,9 @@ void drawCoordinateAxis()
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
+/**
+ * 
+ */
 void drawSquare()
 {
     glBegin(GL_QUADS);
@@ -59,6 +69,9 @@ void drawSquare()
     glEnd();
 }
 
+/**
+ * 
+ */
 void drawObstacle()
 {
     glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
@@ -116,6 +129,9 @@ void drawObstacle()
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
+/**
+ * 
+ */
 void drawBall()
 {
     float ballRadius = cc.markerRealEdgeLength / 3.0f;
@@ -128,6 +144,9 @@ void drawBall()
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
+/**
+ * 
+ */
 void drawCoin()
 {
     float coinHeight = cc.markerRealEdgeLength / 10.0f;
@@ -172,6 +191,10 @@ void drawCoin()
  */
 void drawAR(void)
 {
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(makePerspective(cc.cameraMatrix.at<double>(0, 0),
                                   cc.cameraMatrix.at<double>(1, 1),
@@ -183,13 +206,19 @@ void drawAR(void)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
+    
     if (dm.size() > 0)
     {
         for (size_t i = 0; i < dm.size(); i++)
         {
-            // Set the pattern transformation
-            glLoadMatrixf(&dm[i].transformation.data[0]);
+            Mat4 transformation = makeMatRows(
+                dm[i].rotationMatrix(0, 0), dm[i].rotationMatrix(0, 1), dm[i].rotationMatrix(0, 2), 0.0f,
+                dm[i].rotationMatrix(1, 0), dm[i].rotationMatrix(1, 1), dm[i].rotationMatrix(1, 2), 0.0f,
+                dm[i].rotationMatrix(2, 0), dm[i].rotationMatrix(2, 1), dm[i].rotationMatrix(2, 2), 0.0f,
+                dm[i].translationVector(0) + (dm[i].type == MARKER_TYPE_PLAYER ? playerTranslation.data[X] : 0.0f),
+                dm[i].translationVector(1) + (dm[i].type == MARKER_TYPE_PLAYER ? playerTranslation.data[Y] : 0.0f),
+                dm[i].translationVector(2), 1.0f);
+            glLoadMatrixf(&transformation.data[0]);
 
             if (dm[i].type == MARKER_TYPE_COIN)
             {
@@ -205,6 +234,8 @@ void drawAR(void)
             }
         }
     }
+
+    glDisable(GL_DEPTH_TEST);
 }
 
 /**
@@ -248,68 +279,165 @@ void drawBackground(void)
 /**
  * Draw callback for OpenGL.
  */
-void drawCallback(void *)
+void drawCallback(void)
 {
-    intervalRotation += (glutGet(GLUT_ELAPSED_TIME) - intervalLast) / 10.0f;
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
-
     drawBackground();
     drawAR();
+    glutSwapBuffers();
+}
+
+/**
+ * 
+ */
+void quitProgram() {
+    gluDeleteQuadric(quad);
+    releaseCamera();
+	exit( 0 );
+}
+
+/**
+ * 
+ */
+static void handleKeyboardEvent(int key, int status, GLboolean isSpecialKey, int x, int y)
+{
+    if (status == GLUT_DOWN)
+    {
+        if (isSpecialKey)
+        {
+            switch (key)
+            {
+            case GLUT_KEY_F1:
+                // TODO
+                break;
+            default:
+                // Compile warning unused parameter
+                y = x;
+                x = y;
+                break;
+            }
+        }
+        else
+        {
+            switch (key)
+            {
+            case ESC:
+            quitProgram();
+                break;
+            case 'w':
+            case 'W':
+                playerTranslation.data[Y] += interval;
+                break;
+            case 's':
+            case 'S':
+                playerTranslation.data[Y] -= interval;
+                break;
+            case 'a':
+            case 'A':
+                playerTranslation.data[X] -= interval;
+                break;
+            case 'd':
+            case 'D':
+                playerTranslation.data[X] += interval;
+                break;
+            }
+        }
+    }
+}
+
+/**
+ * 
+ */
+void keyboardCallback(unsigned char key, int x, int y)
+{
+    handleKeyboardEvent(key, GLUT_DOWN, GL_FALSE, x, y);
+}
+
+/**
+ * 
+ */
+void timerCallback(int last)
+{
+    int now = glutGet(GLUT_ELAPSED_TIME);
+    interval = (double)(now - last) / 1000.0f;
+    intervalRotation += interval;
+
+    dm.clear();
+    processMarkerDetection(dm, bg, app, cc);
+    
+    glutTimerFunc(1000.0f / TIMER_CALLS_PS, timerCallback, now);
+    glutPostRedisplay();
+}
+
+/**
+ * 
+ */
+void registerCallbacks(void)
+{
+    glutKeyboardFunc(keyboardCallback);
+    glutTimerFunc(1000.0f / TIMER_CALLS_PS, timerCallback, glutGet(GLUT_ELAPSED_TIME));
+    glutDisplayFunc(drawCallback);
+}
+
+/**
+ * Initializes the scene parameters.
+ * 
+ * @return  true, if initialization was successful
+ */
+bool initializeScene(void)
+{
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glViewport(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+
+    quad = gluNewQuadric();
+
+    return glGetError() == GL_NO_ERROR;
 }
 
 /**
  * Initializes the OpenGL context.
  * 
  * @param windowName        Name of the window
+ * @param 
  * @param cameraCalibration Settings of current camera calibration
  * @return                  true, if initialization was successful
  */
-bool initializeGL(const std::string &windowName, const CameraCalibration &cameraCalibration)
+bool initializeGL(const std::string &windowName, const Application &application, const CameraCalibration &cameraCalibration)
 {
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glViewport(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+    unsigned int windowID = 0;
+    int argc = 1;
+    std::string argvCpp = "cmd";
+    char *argv = (char *)(argvCpp.c_str());
 
-    // Must be both flags since only OpenGL collides with GUI lib cvui
-    cv::namedWindow(windowName, cv::WINDOW_OPENGL | CV_WINDOW_AUTOSIZE);
-    cv::resizeWindow(windowName, CAMERA_WIDTH, CAMERA_HEIGHT);
-    cv::setOpenGlContext(windowName);
-    cv::setOpenGlDrawCallback(windowName, drawCallback, 0);
-    intervalLast = glutGet(GLUT_ELAPSED_TIME);
-
+    glutInit(&argc, &argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(CAMERA_WIDTH, CAMERA_HEIGHT);
+    glutInitWindowPosition(0, 0);
+    windowID = glutCreateWindow(windowName.c_str());
     cc = cameraCalibration;
+    app = application;
+    playerTranslation = makeVec(0.0f, 0.0f);
+    intervalRotation = 0.0f;
 
-    quad = gluNewQuadric();
-    gluQuadricTexture(quad, GL_TRUE);
+    if (windowID)
+    {
+        if (initializeScene())
+        {
+            registerCallbacks();
+            glutMainLoop();
 
-    return glGetError() == GL_NO_ERROR;
-}
+            return true;
+        }
+        else
+        {
+            releaseCamera();
+            glutDestroyWindow(windowID);
+        }
+    }
 
-/**
- * Cleans up GL related stuff
- */
-void releaseGL(void)
-{
-    gluDeleteQuadric(quad);
-}
-
-/**
- * Updates the framebuffer and starts a new draw call.
- * 
- * @param windowName        Name of the window in which will be rendered
- * @param frame             Processed frame of camera
- * @param detectedMarkers   In the scene detected markers
- */
-void updateWindowGL(const std::string &windowName, const cv::Mat &frame, const std::vector<Marker> &detectedMarkers)
-{
-    frame.copyTo(bg);
-    dm = detectedMarkers;
-    cv::updateWindow(windowName);
-    intervalLast = glutGet(GLUT_ELAPSED_TIME);
+    return false;
 }

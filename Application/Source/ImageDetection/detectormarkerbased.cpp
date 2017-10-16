@@ -21,7 +21,6 @@
 const std::string LOGGING_NAME = "detectormarkerbased.cpp";
 
 /** Actual marker which will be searched in the given camera frame */
-// TODO: MORE THAN ONE MARKER!!!!
 std::vector<Marker> defaultMarkers;
 
 /**
@@ -415,19 +414,14 @@ void estimatePosition(Marker &marker, const CameraCalibration &cc)
     cv::solvePnP(getMarker3DPoints(cc.markerRealEdgeLength), marker.points, cc.cameraMatrix, cc.distanceCoefficients, raux, taux);
 
     raux.convertTo(rotationVector, CV_32F);
-    taux.convertTo(translationVector, CV_32F);
+    taux.convertTo(marker.translationVector, CV_32F);
 
     // Get rotation matrix from rotation vector
-    cv::Mat_<float> rotationMatrix(3, 3);
-    cv::Rodrigues(rotationVector, rotationMatrix);
+    cv::Rodrigues(rotationVector, marker.rotationMatrix);
 
     // Invert rotation matrix & translation vector
-    rotationMatrix = rotationMatrix.inv();
-    marker.transformation = makeMatRows(
-        rotationMatrix(0, 0), rotationMatrix(0, 1), rotationMatrix(0, 2), 0.0f,
-        rotationMatrix(1, 0), rotationMatrix(1, 1), rotationMatrix(1, 2), 0.0f,
-        rotationMatrix(2, 0), rotationMatrix(2, 1), rotationMatrix(2, 2), 0.0f,
-        -translationVector(0), -translationVector(1), -translationVector(2), 1.0f);
+    marker.rotationMatrix = marker.rotationMatrix.inv();
+    marker.translationVector = -marker.translationVector;
 }
 
 /**
@@ -442,5 +436,23 @@ void processFrame(const cv::Mat &source, cv::Mat &result, Application &app, cons
         // Estimate all positions of marker and save corresponding transformation matrix
         for (Marker &marker : detectedMarkers)
             estimatePosition(marker, cc);
+    }
+}
+
+/**
+ * 
+ */
+void processMarkerDetection(std::vector<Marker> &detectedMarkers, cv::Mat &result, Application &app, const CameraCalibration &cc) {
+    cv::Mat frame;
+
+    if (getNextFrame(frame))
+    {
+      frame.copyTo(result);
+      processFrame(frame, result, app, cc, detectedMarkers);
+      // GUI(result, app, fps);
+    }
+    else
+    {
+      logWarn(LOGGING_NAME, "Frame of camera is empty.");
     }
 }
