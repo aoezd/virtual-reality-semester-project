@@ -17,7 +17,6 @@
 #include "../Header/Utilities/argparse.h"
 #include "../Header/Utilities/imageio.h"
 #include "../Header/Utilities/utils.h"
-#include "../Header/GUI/gui.h"
 
 #define WINDOW "Markerbased AR Application"
 
@@ -94,7 +93,6 @@ int main(int argc, char *argv[])
         app.minSideEdgeLength = MIN_SIDE_EDGE_LENGTH;
         app.percentageBitMask = PERCENTAGE_BIT_MASK;
         app.percentageBlackBorder = PERCENTAGE_BLACK_BORDER;
-        // initializeGUI(WINDOW);
         if (initializeDetectorMarkerBased(app, markerImages))
         {
           if (!initializeGL(WINDOW, app, cc))
@@ -124,6 +122,7 @@ int main(int argc, char *argv[])
   else
   {
     logWarn(LOGGING_NAME, "No arguments found...");
+    printUsage();
   }
 
   return err;
