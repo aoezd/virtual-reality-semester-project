@@ -11,6 +11,7 @@
 #include <opencv2/calib3d.hpp>
 
 #include "../../Header/Utilities/utils.h"
+#include "../../Header/Utilities/argparse.h"
 
 // --------------- String Stuff ---------------
 
@@ -20,6 +21,34 @@ bool equal(const std::string &str1, const std::string &str2)
 }
 
 // --------------- Printing Stuff ---------------
+
+void printUsage(void)
+{
+    std::cout << "--------------- Markerbased AR Application ---------------" << std::endl;
+    std::cout << "mb-ar-app [options]" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << HELP << "   | " << HELP_ << "\t" << std::endl
+              << "\tPrints this help/usage" << std::endl
+              << std::endl;
+    std::cout << MARKER_COIN << "  | " << MARKER_COIN_ << " [path to image; default: \"" << MARKER_COIN_DEFAULT << "\"]" << std::endl
+              << "\tDefines the marker for coin 3D objects" << std::endl
+              << std::endl;
+    std::cout << MARKER_OBSTACLE << "  | " << MARKER_OBSTACLE_ << " [path to image; default: \"" << MARKER_OBSTACLE_DEFAULT << "\"]" << std::endl
+              << "\tDefines the marker for obstacle (red bar) 3D objects" << std::endl
+              << std::endl;
+    std::cout << MARKER_PLAYER << "  | " << MARKER_PLAYER_ << " [path to image; default: \"" << MARKER_PLAYER_DEFAULT << "\"]" << std::endl
+              << "\tDefines the marker for the player (grey ball) 3D object" << std::endl
+              << std::endl;
+    std::cout << CAMERA_CALIBRATION_COMPUTE << " | " << CAMERA_CALIBRATION_COMPUTE_ << " [path to dir with images]" << std::endl
+              << "\tComputes the camera calibration with all images in your desired path" << std::endl
+              << std::endl;
+    std::cout << CAMERA_CALIBRATION_LOAD << " | " << CAMERA_CALIBRATION_LOAD_ << " [path to .ccc-file]" << std::endl
+              << "\tLoads the camera calibration directly from a desired path" << std::endl
+              << std::endl
+              << std::endl;
+    std::cout << "Press \"h\" if you want to get further help at runtime" << std::endl;
+    std::cout << "----------------------------------------------------------" << std::endl;
+}
 
 void printVP2f(const std::vector<cv::Point2f> &vp2f)
 {
@@ -356,17 +385,17 @@ void drawCornerDots(const std::vector<cv::Point2f> &polygon, cv::Mat &image)
 
 void drawAxis(cv::Mat &result, const CameraCalibration &cc, cv::Mat rotationVector, cv::Mat translationVector)
 {
-        std::vector<cv::Point3f> axisPoints;
-        std::vector<cv::Point2f> imagePoints;
+    std::vector<cv::Point3f> axisPoints;
+    std::vector<cv::Point2f> imagePoints;
 
-        axisPoints.push_back(cv::Point3f(0, 0, 0));
-        axisPoints.push_back(cv::Point3f(cc.markerRealEdgeLength * -0.5f, 0, 0));
-        axisPoints.push_back(cv::Point3f(0, cc.markerRealEdgeLength * -0.5f, 0));
-        axisPoints.push_back(cv::Point3f(0, 0, cc.markerRealEdgeLength * -0.5f));
+    axisPoints.push_back(cv::Point3f(0, 0, 0));
+    axisPoints.push_back(cv::Point3f(cc.markerRealEdgeLength * -0.5f, 0, 0));
+    axisPoints.push_back(cv::Point3f(0, cc.markerRealEdgeLength * -0.5f, 0));
+    axisPoints.push_back(cv::Point3f(0, 0, cc.markerRealEdgeLength * -0.5f));
 
-        cv::projectPoints(axisPoints, rotationVector, translationVector, cc.cameraMatrix, cc.distanceCoefficients, imagePoints);
+    cv::projectPoints(axisPoints, rotationVector, translationVector, cc.cameraMatrix, cc.distanceCoefficients, imagePoints);
 
-        line(result, imagePoints[0], imagePoints[1], cv::Scalar(0, 0, 255), 3);
-        line(result, imagePoints[0], imagePoints[2], cv::Scalar(0, 255, 0), 3);
-        line(result, imagePoints[0], imagePoints[3], cv::Scalar(255, 0, 0), 3);
+    line(result, imagePoints[0], imagePoints[1], cv::Scalar(0, 0, 255), 3);
+    line(result, imagePoints[0], imagePoints[2], cv::Scalar(0, 255, 0), 3);
+    line(result, imagePoints[0], imagePoints[3], cv::Scalar(255, 0, 0), 3);
 }

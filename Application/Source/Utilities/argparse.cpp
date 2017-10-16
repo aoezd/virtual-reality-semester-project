@@ -29,8 +29,14 @@ int parseArg(int argc, std::vector<std::string> argv, std::map<std::string, cv::
     {
         std::string param = argv.at(i);
 
+        // -h
+        if (equal(param, HELP) || equal(param, HELP_))
+        {
+            printUsage();
+        }
+
         // -m{c, o, p}
-        if (equal(param, MARKER_COIN))
+        if (equal(param, MARKER_COIN) || equal(param, MARKER_COIN_))
         {
             if (!loadImage(marker, argv.at(i + 1)))
             {
@@ -48,7 +54,7 @@ int parseArg(int argc, std::vector<std::string> argv, std::map<std::string, cv::
         }
 
         // -ccc
-        if (equal(param, CAMERA_CALIBRATION_COMPUTE))
+        if (equal(param, CAMERA_CALIBRATION_COMPUTE) || equal(param, CAMERA_CALIBRATION_COMPUTE_))
         {
             if (!loadImages(calibrationImages, argv.at(i + 1)))
             {
@@ -58,7 +64,7 @@ int parseArg(int argc, std::vector<std::string> argv, std::map<std::string, cv::
         }
 
         // -ccl
-        if (equal(param, CAMERA_CALIBRATION_LOAD))
+        if (equal(param, CAMERA_CALIBRATION_LOAD) || equal(param, CAMERA_CALIBRATION_LOAD_))
         {
             if (!loadCameraCalibration(cc, argv.at(i + 1)))
             {

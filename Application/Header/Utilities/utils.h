@@ -40,6 +40,7 @@ typedef struct
 bool equal(const std::string &str1, const std::string &str2);
 
 // --------------- Printing Stuff ---------------
+void printUsage(void);
 void printVP2f(const std::vector<cv::Point2f> &vp2f);
 void printVP3f(const std::vector<cv::Point3f> &vp3f);
 void printVP(const std::vector<cv::Point> &vp);

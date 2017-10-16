@@ -8,12 +8,13 @@
 
 #include <iostream>
 #include <GL/glut.h>
-#include <opencv2/highgui.hpp>
+#include <opencv2/core.hpp>
+#include <stdarg.h>
 
 #include "../../Header/Rendering3D/rendering3d.h"
 #include "../../Header/ImageDetection/camera.h"
 
-#define TIMER_CALLS_PS 60
+#define TIMER_CALLS_PS 120
 
 cv::Mat bg;
 std::vector<Marker> dm;
@@ -24,9 +25,10 @@ GLUquadricObj *quad;
 double interval;
 double intervalRotation;
 Vec2 playerTranslation;
+bool showHelp;
 
 /**
- * 
+ * Draws coordinate axis at center.
  */
 void drawCoordinateAxis()
 {
@@ -55,9 +57,9 @@ void drawCoordinateAxis()
 }
 
 /**
- * 
+ * Draws a square in marker size.
  */
-void drawSquare()
+void drawSquare(void)
 {
     glBegin(GL_QUADS);
     {
@@ -70,19 +72,10 @@ void drawSquare()
 }
 
 /**
- * 
+ * Draws a cube in marker size.
  */
-void drawObstacle()
+void drawCube(void)
 {
-    glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-
-    glPushMatrix();
-    glRotatef(intervalRotation * 1.5f, 0.0f, 0.0f, 1.0f);
-    glTranslatef(0.0f, 0.0f, cc.markerRealEdgeLength / 2.0f);
-
-    glPushMatrix();
-    glScalef(2.5f, 0.15f, 0.15f);
-
     // Top
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, cc.markerRealEdgeLength);
@@ -122,7 +115,22 @@ void drawObstacle()
     glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
     drawSquare();
     glPopMatrix();
+}
 
+/**
+ * Draws a rotating red bar.
+ */
+void drawObstacle(void)
+{
+    glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+
+    glPushMatrix();
+    glRotatef(intervalRotation * 100.0f, 0.0f, 0.0f, 1.0f);
+    glTranslatef(0.0f, 0.0f, cc.markerRealEdgeLength / 2.0f);
+
+    glPushMatrix();
+    glScalef(2.5f, 0.15f, 0.15f);
+    drawCube();
     glPopMatrix();
 
     glPopMatrix();
@@ -130,44 +138,49 @@ void drawObstacle()
 }
 
 /**
- * 
+ * Draws a ball at center.
  */
-void drawBall()
+void drawBall(void)
 {
     float ballRadius = cc.markerRealEdgeLength / 3.0f;
 
     glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
     glPushMatrix();
+    glTranslatef(playerTranslation.data[X] * cc.markerRealEdgeLength, playerTranslation.data[Y] * cc.markerRealEdgeLength, 0.0f);
+
+    glPushMatrix();
     glTranslatef(0.0f, 0.0f, ballRadius);
     gluSphere(quad, ballRadius, 20, 20);
+    glPopMatrix();
+
     glPopMatrix();
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 /**
+ * Draws a disc on marker.
  * 
+ * @param innerColor    Color of inner side of disc
+ * @param outerColor    Color of outer side of disc
  */
-void drawCoin()
+void drawDisc(const GLfloat innerColor[4], const GLfloat outerColor[4])
 {
-    float coinHeight = cc.markerRealEdgeLength / 10.0f;
-    float coinRadius = cc.markerRealEdgeLength / 3.0f;
-
-    glPushMatrix();
-    glRotatef(intervalRotation, 0.0f, 0.0f, 1.0f);
+    float discHeight = cc.markerRealEdgeLength / 10.0f;
+    float discRadius = cc.markerRealEdgeLength / 3.0f;
 
     glPushMatrix();
     glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-    glTranslatef(0.0f, cc.markerRealEdgeLength / 2.0f, -coinHeight / 2.0f);
+    glTranslatef(0.0f, cc.markerRealEdgeLength / 2.0f, -discHeight / 2.0f);
 
     // Cylinder
-    glColor4f(0.95f, 0.7f, 0.25f, 1.0f);
-    gluCylinder(quad, coinRadius, coinRadius, coinHeight, 20, 10);
+    glColor4fv(outerColor);
+    gluCylinder(quad, discRadius, discRadius, discHeight, 20, 10);
 
     // Front plane
-    glColor4f(0.95f, 0.9f, 0.25f, 1.0f);
+    glColor4fv(innerColor);
     glPushMatrix();
     {
-        glTranslatef(0.0f, 0.0f, coinHeight);
+        glTranslatef(0.0f, 0.0f, discHeight);
         gluDisk(quad, 0.0f, cc.markerRealEdgeLength / 3.0f, 20, 20);
     }
     glPopMatrix();
@@ -181,13 +194,91 @@ void drawCoin()
     glPopMatrix();
 
     glPopMatrix();
+}
+
+/**
+ * Draws a yellow rotating coin.
+ */
+void drawCoin(void)
+{
+    GLfloat innerColor[4] = {0.95f, 0.9f, 0.25f, 1.0f};
+    GLfloat outerColor[4] = {0.95f, 0.7f, 0.25f, 1.0f};
+
+    glPushMatrix();
+    glRotatef(intervalRotation * 150.0f, 0.0f, 0.0f, 1.0f);
+
+    drawDisc(innerColor, outerColor);
 
     glPopMatrix();
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 /**
- * 
+ * Draws the most simple car ever.
+ */
+void drawCar(void)
+{
+    GLfloat innerColor[4] = {0.3f, 0.3f, 0.3f, 1.0f};
+    GLfloat outerColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+
+    glPushMatrix();
+    glTranslatef(playerTranslation.data[X] * 0.5f, playerTranslation.data[Y] * 0.5f, 0.0f);
+    glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
+
+    glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, cc.markerRealEdgeLength * 0.25f);
+    glScalef(0.5f, 1.0f, 0.3f);
+    drawCube();
+    glPopMatrix();
+
+    glColor4f(0.0f, 0.0f, 0.5f, 1.0f);
+    glPushMatrix();
+    glTranslatef(0.0f, -cc.markerRealEdgeLength * 0.5f, cc.markerRealEdgeLength * 0.3f);
+    glScalef(0.1f, 0.3f, 0.1f);
+    drawCube();
+    glPopMatrix();
+
+    // Tires
+    glPushMatrix();
+    glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
+
+    // Tire left up
+    glPushMatrix();
+    glTranslatef(-cc.markerRealEdgeLength * 0.4f, cc.markerRealEdgeLength * 0.27f, 0.0f);
+    glScalef(0.4f, 0.4f, 0.4f);
+    drawDisc(innerColor, outerColor);
+    glPopMatrix();
+
+    // Tire left down
+    glPushMatrix();
+    glTranslatef(-cc.markerRealEdgeLength * 0.4f, -cc.markerRealEdgeLength * 0.27f, 0.0f);
+    glScalef(0.4f, 0.4f, 0.4f);
+    drawDisc(innerColor, outerColor);
+    glPopMatrix();
+
+    // Tire right up
+    glPushMatrix();
+    glTranslatef(cc.markerRealEdgeLength * 0.4f, cc.markerRealEdgeLength * 0.27f, 0.0f);
+    glScalef(0.4f, 0.4f, 0.4f);
+    drawDisc(innerColor, outerColor);
+    glPopMatrix();
+
+    // Tire right down
+    glPushMatrix();
+    glTranslatef(cc.markerRealEdgeLength * 0.4f, -cc.markerRealEdgeLength * 0.27f, 0.0f);
+    glScalef(0.4f, 0.4f, 0.4f);
+    drawDisc(innerColor, outerColor);
+    glPopMatrix();
+
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+/**
+ * Draws all augumented reality objects in the scene.
+ * Depending on marker position, all objects will be rendered directly above a marker.
  */
 void drawAR(void)
 {
@@ -206,7 +297,7 @@ void drawAR(void)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    
+
     if (dm.size() > 0)
     {
         for (size_t i = 0; i < dm.size(); i++)
@@ -215,9 +306,7 @@ void drawAR(void)
                 dm[i].rotationMatrix(0, 0), dm[i].rotationMatrix(0, 1), dm[i].rotationMatrix(0, 2), 0.0f,
                 dm[i].rotationMatrix(1, 0), dm[i].rotationMatrix(1, 1), dm[i].rotationMatrix(1, 2), 0.0f,
                 dm[i].rotationMatrix(2, 0), dm[i].rotationMatrix(2, 1), dm[i].rotationMatrix(2, 2), 0.0f,
-                dm[i].translationVector(0) + (dm[i].type == MARKER_TYPE_PLAYER ? playerTranslation.data[X] : 0.0f),
-                dm[i].translationVector(1) + (dm[i].type == MARKER_TYPE_PLAYER ? playerTranslation.data[Y] : 0.0f),
-                dm[i].translationVector(2), 1.0f);
+                dm[i].translationVector(0), dm[i].translationVector(1), dm[i].translationVector(2), 1.0f);
             glLoadMatrixf(&transformation.data[0]);
 
             if (dm[i].type == MARKER_TYPE_COIN)
@@ -230,7 +319,7 @@ void drawAR(void)
             }
             else if (dm[i].type == MARKER_TYPE_PLAYER)
             {
-                drawBall();
+                drawCar();
             }
         }
     }
@@ -277,29 +366,92 @@ void drawBackground(void)
 }
 
 /**
+ * 
+ */
+void drawDebug(void)
+{
+    cv::Point p1(CAMERA_WIDTH - CAMERA_WIDTH * 0.3f, 30);
+    cv::putText(bg, std::to_string(app.validMarkerCount) + " valid marker found", p1, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(0, 0, 200), 1, 8);
+
+    cv::Point p2(CAMERA_WIDTH - CAMERA_WIDTH * 0.3f, 50);
+    cv::putText(bg, "Min. marker edge length: " + std::to_string(app.minSideEdgeLength), p2, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(0, 0, 200), 1, 8);
+
+    cv::Point p3(CAMERA_WIDTH - CAMERA_WIDTH * 0.3f, 70);
+    cv::putText(bg, "Min. % for black pixels at border: " + std::to_string(static_cast<int>(app.percentageBlackBorder * 100.0f)) + "%", p3, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(0, 0, 200), 1, 8);
+
+    cv::Point p4(CAMERA_WIDTH - CAMERA_WIDTH * 0.3f, 90);
+    cv::putText(bg, "Min. % for white pixels in bit mask: " + std::to_string(static_cast<int>(app.percentageBitMask * 100.0f)) + "%", p4, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(0, 0, 200), 1, 8);
+}
+
+/**
+ * Prints a help on screen.
+ */
+void drawHelp(void)
+{
+    cv::Point p1(10, 30);
+    cv::putText(bg, "HELP", p1, CV_FONT_HERSHEY_PLAIN, 2.0, cv::Scalar::all(0), 3, 8);
+
+    cv::Point p2(10, 50);
+    cv::putText(bg, "h - Toggle this help", p2, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2, 8);
+
+    cv::Point p3(10, 70);
+    cv::putText(bg, "w - Move car UP", p3, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2, 8);
+
+    cv::Point p4(10, 90);
+    cv::putText(bg, "s - Move car DOWN", p4, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2, 8);
+
+    cv::Point p5(10, 110);
+    cv::putText(bg, "a - Move car LEFT", p5, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2, 8);
+
+    cv::Point p6(10, 130);
+    cv::putText(bg, "d - Move car RIGHT", p6, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2, 8);
+
+    cv::Point p7(10, 150);
+    cv::putText(bg, "o | p - Increase/decrease min. size of marker edge length", p7, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2, 8);
+
+    cv::Point p8(10, 170);
+    cv::putText(bg, "u | i - Increase/decrease % of black pixels in marker border to be seen as black cell (0)", p8, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2, 8);
+
+    cv::Point p9(10, 190);
+    cv::putText(bg, "t | z - Increase/decrease % of white pixels in marker id to be seen as white cell (1)", p9, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2, 8);
+}
+
+/**
  * Draw callback for OpenGL.
  */
 void drawCallback(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (showHelp)
+    {
+        drawHelp();
+    }
+    drawDebug();
     drawBackground();
     drawAR();
     glutSwapBuffers();
 }
 
 /**
- * 
+ * Quits program and releases all reserved memory.
  */
-void quitProgram() {
+void quitProgram(void)
+{
     gluDeleteQuadric(quad);
     releaseCamera();
-	exit( 0 );
+    exit(0);
 }
 
 /**
+ * Handles the processing of pressed key.
  * 
+ * @param key           Pressed key.
+ * @param status        Pressed or released?
+ * @param isSpecialKey  F1, F2, etc.
+ * @param x             X-position of mouse at time when key pressed
+ * @param y             Y-position of mouse at time when key pressed
  */
-static void handleKeyboardEvent(int key, int status, GLboolean isSpecialKey, int x, int y)
+void handleKeyboardEvent(int key, int status, GLboolean isSpecialKey, int x, int y)
 {
     if (status == GLUT_DOWN)
     {
@@ -307,9 +459,6 @@ static void handleKeyboardEvent(int key, int status, GLboolean isSpecialKey, int
         {
             switch (key)
             {
-            case GLUT_KEY_F1:
-                // TODO
-                break;
             default:
                 // Compile warning unused parameter
                 y = x;
@@ -322,7 +471,9 @@ static void handleKeyboardEvent(int key, int status, GLboolean isSpecialKey, int
             switch (key)
             {
             case ESC:
-            quitProgram();
+            case 'q':
+            case 'Q':
+                quitProgram();
                 break;
             case 'w':
             case 'W':
@@ -334,11 +485,39 @@ static void handleKeyboardEvent(int key, int status, GLboolean isSpecialKey, int
                 break;
             case 'a':
             case 'A':
-                playerTranslation.data[X] -= interval;
+                playerTranslation.data[X] += interval;
                 break;
             case 'd':
             case 'D':
-                playerTranslation.data[X] += interval;
+                playerTranslation.data[X] -= interval;
+                break;
+            case 'h':
+            case 'H':
+                showHelp = !showHelp;
+                break;
+            case 'o':
+            case 'O':
+                app.minSideEdgeLength = app.minSideEdgeLength < 15000.0f ? app.minSideEdgeLength + 1000.0f : app.minSideEdgeLength;
+                break;
+            case 'p':
+            case 'P':
+                app.minSideEdgeLength = app.minSideEdgeLength > 0.0f ? app.minSideEdgeLength - 1000.0f : app.minSideEdgeLength;
+                break;
+            case 'u':
+            case 'U':
+                app.percentageBlackBorder = app.percentageBlackBorder < 1.0f ? app.percentageBlackBorder + 0.05f : app.percentageBlackBorder;
+                break;
+            case 'i':
+            case 'I':
+                app.percentageBlackBorder = app.percentageBlackBorder > 0.0f ? app.percentageBlackBorder - 0.05f : app.percentageBlackBorder;
+                break;
+            case 't':
+            case 'T':
+                app.percentageBitMask = app.percentageBitMask < 1.0f ? app.percentageBitMask + 0.05f : app.percentageBitMask;
+                break;
+            case 'z':
+            case 'Z':
+                app.percentageBitMask = app.percentageBitMask > 0.0f ? app.percentageBitMask - 0.05f : app.percentageBitMask;
                 break;
             }
         }
@@ -346,7 +525,11 @@ static void handleKeyboardEvent(int key, int status, GLboolean isSpecialKey, int
 }
 
 /**
+ * Keyboard-callback
  * 
+ * @param key   Pressed key
+ * @param x     X-position of mouse at time when key pressed
+ * @param y     Y-position of mouse at time when key pressed
  */
 void keyboardCallback(unsigned char key, int x, int y)
 {
@@ -354,7 +537,9 @@ void keyboardCallback(unsigned char key, int x, int y)
 }
 
 /**
+ * Timer-callback.
  * 
+ * @param last  Last call time in milliseconds
  */
 void timerCallback(int last)
 {
@@ -364,13 +549,13 @@ void timerCallback(int last)
 
     dm.clear();
     processMarkerDetection(dm, bg, app, cc);
-    
+
     glutTimerFunc(1000.0f / TIMER_CALLS_PS, timerCallback, now);
     glutPostRedisplay();
 }
 
 /**
- * 
+ * Registers all needed callbacks.
  */
 void registerCallbacks(void)
 {
@@ -417,11 +602,13 @@ bool initializeGL(const std::string &windowName, const Application &application,
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(CAMERA_WIDTH, CAMERA_HEIGHT);
     glutInitWindowPosition(0, 0);
+
     windowID = glutCreateWindow(windowName.c_str());
     cc = cameraCalibration;
     app = application;
     playerTranslation = makeVec(0.0f, 0.0f);
     intervalRotation = 0.0f;
+    showHelp = false;
 
     if (windowID)
     {

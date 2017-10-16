@@ -73,6 +73,12 @@ int main(int argc, char *argv[])
     std::vector<std::string> arg(argv + 1, argv + argc);
     CameraCalibration cc;
 
+    if (argc == 2 && (equal(argv[1], HELP) || equal(argv[1], HELP_)))
+    {
+      printUsage();
+      return err;
+    }
+
     // Parse all parameters and initialize corresponding variables
     if (!parseArg(--argc, arg, markerImages, calibrationImages, cc))
     {
