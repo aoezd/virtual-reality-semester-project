@@ -760,7 +760,7 @@ Mat4 makeLookAt(const Vec3 &center, const Vec3 &lookAt, const Vec3 &up)
     return m;
 }
 
-// --------------- OpenCV Matrices ---------------
+// --------------- OpenCV Transformations ---------------
 
 Mat4 makeOrthographic(const int &w, const int &h)
 {

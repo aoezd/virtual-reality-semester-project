@@ -1,8 +1,5 @@
 /**
  * camera.cpp
- * TODO
- * 
- * Auch eine Markerlib bauen bzw. man kann mit 1, 0 eigene marker erstellen anstelle Sie aus Bildern zu ziehen
  *
  * Created: 2017-08-30
  * Author: Aykut Özdemir
@@ -15,8 +12,8 @@
 
 #include "../../Header/ImageDetection/camera.h"
 #include "../../Header/Logging/logger.h"
-#include "../../Header/GUI/gui.h"
 #include "../../Header/Utilities/imageio.h"
+#include "../../Header/Utilities/utils.h"
 
 #define WINDOW "Camera Calibration"
 
@@ -25,7 +22,11 @@ const std::string LOGGING_NAME = "camera.cpp";
 cv::VideoCapture camera(0);
 
 /**
- *
+ * Initilizes the camere and performs a camera calibration if necessary.
+ * 
+ * @param cc                Computed/Loaded camera calibration
+ * @param calibrationImages Images with a calibration pattern for the computation of camera calibration
+ * @return                  true, if initilization was successfully (and therefore computing/loading a camera matrix)
  */
 bool initializeCamera(CameraCalibration &cc, const std::vector<cv::Mat> &calibrationImages)
 {
@@ -60,18 +61,12 @@ bool initializeCamera(CameraCalibration &cc, const std::vector<cv::Mat> &calibra
     return false;
 }
 
-/**
- *
- */
 bool getNextFrame(cv::Mat &frame)
 {
     camera.read(frame);
     return !frame.empty();
 }
 
-/**
- *
- */
 void releaseCamera()
 {
     camera.release();
@@ -98,7 +93,12 @@ void createKnownBoardPosition(cv::Size boardSize, float chessboardRealTileEdgeLe
 }
 
 /**
- *
+ * Saves a given camera calibration into a local file.
+ * All individual data will be saved into one row of the file.
+ * 
+ * @param cc        Camera calibration which will be saved
+ * @param filePath  File path of calibration file
+ * @return          True, if saving was successfully
  */
 bool saveCameraCalibration(const CameraCalibration &cc, const std::string &filePath)
 {
@@ -149,7 +149,11 @@ bool saveCameraCalibration(const CameraCalibration &cc, const std::string &fileP
 }
 
 /**
- *
+ * Performs a camera calibration computation with given found calibration pattern points in 2D and corresponding virtual 3D points.
+ * 
+ * @param cc        Camera calibration which will be saved
+ * @param filePath  File path of calibration file
+ * @return          True, if saving was successfully
  */
 void calibrateCamera(CameraCalibration &cc, const std::vector<std::vector<cv::Point2f>> &chessboardImageSpacePoints)
 {
@@ -164,7 +168,13 @@ void calibrateCamera(CameraCalibration &cc, const std::vector<std::vector<cv::Po
 }
 
 /**
- *
+ * Performs a live camera calibration.
+ * The user will be asked to give some global information (name of camera, reallife measurements of virtual objects) for perspective transformation.
+ * User must shoot some images of different angles of a calibration pattern, which will be used for the calibration.
+ * After computation of the camera calibration, all data will be saved into a local file.
+ * 
+ * @param cc    Camera calibration which will be computed
+ * @return      True, if computation was successfully
  */
 bool startCameraCalibration(CameraCalibration &cc)
 {
@@ -192,7 +202,7 @@ bool startCameraCalibration(CameraCalibration &cc)
     std::vector<std::vector<cv::Point2f>> chessboardImageSpacePoints;
 
     cv::namedWindow(WINDOW, CV_WINDOW_AUTOSIZE);
-    initializeGUI(WINDOW);
+    cv::resizeWindow(WINDOW, CAMERA_WIDTH, CAMERA_HEIGHT);
 
     if (!dirExists("./Images/CameraCalibration") && dirMake("./Images/CameraCalibration")) {
         logError(LOGGING_NAME, "Couldn't create directory at './Images/CameraCalibration'.");
@@ -208,6 +218,8 @@ bool startCameraCalibration(CameraCalibration &cc)
     {
         std::vector<cv::Point2f> points;
         bool foundPoints = false;
+        cv::Point pCalibration(frame.rows * 0.05f, frame.cols * 0.05f);
+        cv::Point pEnter(frame.rows * 0.05f, frame.cols * 0.05f + frame.cols * 0.02f);
 
         if (getNextFrame(frame))
         {
@@ -217,9 +229,12 @@ bool startCameraCalibration(CameraCalibration &cc)
             {
                 frame.copyTo(temp);
                 cv::drawChessboardCorners(frame, DEFAULT_CC_CHESSBOARD_SIZE, points, foundPoints);
+                cv::putText(frame, "SPACE -> Take frame for camera calibration", pCalibration, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(0, 255, 0), 1, 8);
+            } else {
+                cv::putText(frame, "No chessboard points found!", pCalibration, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(0, 0, 255), 1, 8);
             }
 
-            GUICameraCalibration(frame, foundPoints);
+            cv::putText(frame, "ENTER -> Commit images", pEnter, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(255, 0, 0), 1, 8);
             cv::imshow(WINDOW, frame);
         }
         else
@@ -253,7 +268,12 @@ bool startCameraCalibration(CameraCalibration &cc)
 }
 
 /**
- *
+ * Performs a camera calibration.
+ * Like startCameraCalibration(), but the camera calibration will be computed directly with the given images.
+ * 
+ * @param cc        Camera calibration which will be computed
+ * @param images    Images of calibration pattern in different angles
+ * @return          True, if computation was successfully
  */
 bool computeCameraCalibration(CameraCalibration &cc, const std::vector<cv::Mat> &images)
 {
@@ -293,7 +313,12 @@ bool computeCameraCalibration(CameraCalibration &cc, const std::vector<cv::Mat> 
 }
 
 /**
- *
+ * Loads data of a camera calibration from a given local file.
+ * Like startCameraCalibration(), but the camera calibration will be computed directly with the given images.
+ * 
+ * @param cc        Camera calibration which will be loaded
+ * @paramfilePath   Path to the given calibration file
+ * @return          True, if loading was successfully
  */
 bool loadCameraCalibration(CameraCalibration &cc, const std::string &filePath)
 {

@@ -1,6 +1,5 @@
 /**
  * rendering3d.cpp
- * TODO
  *
  * Created: 2017-09-07
  * Author: Aykut Özdemir
@@ -14,7 +13,7 @@
 #include "../../Header/Rendering3D/rendering3d.h"
 #include "../../Header/ImageDetection/camera.h"
 
-#define TIMER_CALLS_PS 120
+#define TIMER_CALLS_PS 60
 
 cv::Mat bg;
 std::vector<Marker> dm;
@@ -366,7 +365,7 @@ void drawBackground(void)
 }
 
 /**
- * 
+ * Prints some debug data, which can be manipulated on runtime.
  */
 void drawDebug(void)
 {

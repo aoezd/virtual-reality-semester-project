@@ -7,7 +7,6 @@
 
 #include "../Utilities/utils.h"
 #include "../Utilities/algebra.h"
-
 #include "camera.h"
 
 #define QUAD_EDGE_COUNT 4

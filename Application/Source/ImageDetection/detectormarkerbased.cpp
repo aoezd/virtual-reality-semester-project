@@ -1,7 +1,6 @@
 /**
  * detectormarkerbased.cpp
- * TODO
- *
+ * 
  * Created: 2017-08-30
  * Author: Aykut Özdemir
  */
@@ -20,7 +19,6 @@
 
 const std::string LOGGING_NAME = "detectormarkerbased.cpp";
 
-/** Actual marker which will be searched in the given camera frame */
 std::vector<Marker> defaultMarkers;
 
 /**
@@ -424,32 +422,24 @@ void estimatePosition(Marker &marker, const CameraCalibration &cc)
     marker.translationVector = -marker.translationVector;
 }
 
-/**
- *
- */
-void processFrame(const cv::Mat &source, cv::Mat &result, Application &app, const CameraCalibration &cc, std::vector<Marker> &detectedMarkers)
-{
-    app.validMarkerCount = 0;
-
-    if (getValidMarkersInFrame(app, source, result, detectedMarkers))
-    {
-        // Estimate all positions of marker and save corresponding transformation matrix
-        for (Marker &marker : detectedMarkers)
-            estimatePosition(marker, cc);
-    }
-}
-
-/**
- * 
- */
 void processMarkerDetection(std::vector<Marker> &detectedMarkers, cv::Mat &result, Application &app, const CameraCalibration &cc) {
     cv::Mat frame;
 
     if (getNextFrame(frame))
     {
-      frame.copyTo(result);
-      processFrame(frame, result, app, cc, detectedMarkers);
-      // GUI(result, app, fps);
+        frame.copyTo(result);
+        app.validMarkerCount = 0;
+        
+        if (getValidMarkersInFrame(app, frame, result, detectedMarkers))
+        {
+            // Estimate all positions of marker and save corresponding transformation matrix
+            for (Marker &marker : detectedMarkers)
+            {
+                estimatePosition(marker, cc);
+            }
+        }
+
+        frame.release();
     }
     else
     {

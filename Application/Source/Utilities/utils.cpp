@@ -1,6 +1,5 @@
 /**
- * main.cpp
- * TODO
+ * utils.cpp
  *
  * Created: 2017-07-23
  * Author: Aykut Özdemir
@@ -202,12 +201,13 @@ cv::Mat rotate90deg(const cv::Mat &m, const bool &clockwise, int count)
     return t;
 }
 
-/**
- * 3 2
- * 0 1
- */
 std::vector<cv::Point> rotateQuad90deg(const std::vector<cv::Point> &m, const bool &clockwise)
 {
+    /**
+     * 3 2
+     * 0 1
+     */
+
     std::vector<cv::Point> t;
 
     if (clockwise)
@@ -228,12 +228,14 @@ std::vector<cv::Point> rotateQuad90deg(const std::vector<cv::Point> &m, const bo
     return t;
 }
 
-/**
- * 3 2
- * 0 1
- */
+
 std::vector<cv::Point> rotateQuad90deg(const std::vector<cv::Point> &m, const bool &clockwise, int count)
 {
+    /**
+     * 3 2
+     * 0 1
+     */
+
     if (!count)
     {
         return m;

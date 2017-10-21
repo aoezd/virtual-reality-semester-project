@@ -1,6 +1,5 @@
 /**
  * main.cpp
- * TODO
  *
  * Created: 2017-07-23
  * Author: Aykut Özdemir

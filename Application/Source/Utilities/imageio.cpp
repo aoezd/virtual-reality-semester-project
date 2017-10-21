@@ -1,6 +1,5 @@
 /**
  * imageio.cpp
- * TODO
  *
  * Created: 2017-07-23
  * Author: Aykut Özdemir
@@ -161,11 +160,10 @@ bool loadImages(std::vector<cv::Mat> &images, const std::string &dirPath)
 }
 
 /**
- * Schreibt je nach eingegeben Parameter das neue Bild auf die
- * Standardausgabe oder/und in eine Datei.
+ * Saves a given image to a given path.
  * 
- * @param image    Bildinformationen, also aktuelles Bild
- * @param filename Dateipfad des neuen Bilds
+ * @param image    Image to save
+ * @param filename Path to new image location
  */
 void saveImage(const cv::Mat &image, const std::string &filename)
 {

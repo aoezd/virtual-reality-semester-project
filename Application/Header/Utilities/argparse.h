@@ -1,11 +1,3 @@
-/**
- * argparse.h
- * Headerfile von argparse.cpp
- *
- * Created: 2017-07-23
- * Author: Aykut Özdemir
- */
-
 #ifndef ARGPARSE_H_
 #define ARGPARSE_H_
 

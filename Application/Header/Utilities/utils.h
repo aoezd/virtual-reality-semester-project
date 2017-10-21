@@ -1,11 +1,3 @@
-/**
- * utils.h
- * Headerfile von utils.cpp
- *
- * Created: 2017-07-23
- * Author: Aykut Özdemir
- */
-
 #ifndef UTILS_H_
 #define UTILS_H_
 

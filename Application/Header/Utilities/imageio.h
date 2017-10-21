@@ -1,11 +1,3 @@
-/**
- * imageio.h
- * Headerfile von imageio.cpp
- *
- * Created: 2017-07-23
- * Author: Aykut Özdemir
- */
-
 #ifndef IMAGEIO_H_
 #define IMAGEIO_H_
 

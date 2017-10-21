@@ -1,6 +1,5 @@
 /**
  * argparse.cpp
- * TODO
  *
  * Created: 2017-07-23
  * Author: Aykut Özdemir
@@ -17,9 +16,6 @@
 
 const std::string LOGGING_NAME = "argparse.cpp";
 
-/**
- *
- */
 int parseArg(int argc, std::vector<std::string> argv, std::map<std::string, cv::Mat> &markerImages, std::vector<cv::Mat> &calibrationImages, CameraCalibration &cc)
 {
     int i = 0;

@@ -1,11 +1,3 @@
-/**
- * logger.h
- * Headerfile von logger.cpp
- *
- * Created: 2017-07-23
- * Author: Aykut Özdemir
- */
-
 #ifndef _LOGGER_H_
 #define _LOGGER_H_
 
