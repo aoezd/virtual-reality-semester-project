@@ -37,7 +37,7 @@ Der Suchalgorithmus hat folgenden allgemeinen Ablauf:
 
 \noindent Mithilfe des binären Szenenbilds ist die Findung von existierenden Konturen realisierbar. Hierfür wird die Funktion \texttt{findContours()}\footcite{opencvfindContours} von OpenCV verwendet. Die von der Funktion gefundenen Konturen werden anschließend anhand der Anzahl an Kontur-Punkten evaluiert und entsprechend gefiltert, da für den Suchalgorithmus zu kleine Konturen, wie beispielsweise einzelne Blöcke innerhalb von Markern, uninteressant sind. Dies bedeutet, dass Konturen verworfen werden, die eine zu kleine Anzahl an Punkten aufweisen. Der nächste Schritt des Suchalgorithmus bildet die Evaluierung der gefundenen Konturen. Die Funktion \texttt{findCandidates()} (\acs{s} \acs{lst} \ref{lst:findCandidates}) prüft hierfür, ob die gefundenen Konturen grundsätzlich einen Marker darstellen könnten.
 
-\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/findCandidates();} evaluiert, ob die übergebenen Konturen grundsätzlich einen Marker darstellen könnten}, label={lst:findCandidates}]
+\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/findCandidates()} evaluiert, ob die übergebenen Konturen grundsätzlich einen Marker darstellen könnten}, label={lst:findCandidates}]
 void findCandidates(int minSideEdgeLength, const std::vector<std::vector<cv::Point>> &contours, std::vector<std::vector<cv::Point>> &detectedQuads) {
   std::vector<cv::Point> approxQuad;
   for (size_t i = 0; i < contours.size(); i++) {
@@ -61,7 +61,7 @@ void findCandidates(int minSideEdgeLength, const std::vector<std::vector<cv::Poi
 
 \newpage
 
-\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/approximateQuad();} approximiert aus einer gegeben Kontur ein Quadrat \acs{bzw} ein konvexes Polygon aus genau vier Punkten}, label={lst:approximateQuad}]
+\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/approximateQuad()} approximiert aus einer gegeben Kontur ein Quadrat \acs{bzw} ein konvexes Polygon aus genau vier Punkten}, label={lst:approximateQuad}]
 bool approximateQuad(const std::vector<cv::Point> &contour, std::vector<cv::Point> &approxQuad) {
   cv::approxPolyDP(contour, approxQuad, contour.size() * 0.05, true);
   return approxQuad.size() == QUAD_EDGE_COUNT && cv::isContourConvex(approxQuad);
@@ -111,7 +111,7 @@ Sämtliche in der Bildszene gefundene und binarisierte Marker werden zu Beginn g
 
 \newpage
 
-\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/computeId();} konvertiert aus einer gegebenen binären Maske eine eindeutige ID}, label={lst:computeId}]
+\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/computeId()} konvertiert aus einer gegebenen binären Maske eine eindeutige ID}, label={lst:computeId}]
 uint64_t computeId(const cv::Mat &bitMask) {
   std::bitset<64> bits;
   int k = 0;
@@ -126,7 +126,7 @@ uint64_t computeId(const cv::Mat &bitMask) {
 
 \noindent Im Rahmen der Initialisierung des Programms werden die IDs für alle gesuchten \acs{bzw} validen Marker berechnet und für die Validierung der im Bild gesuchten Marker gespeichert. Die IDs der gefundenen Marker werden innerhalb der Validierung mit denen der validen Marker verglichen und gegebenenfalls maximal drei mal rotiert, da die Marker in der Bildszene unterschiedliche Ausrichtungen aufweisen können (\acs{s} \acs{lst} \ref{lst:isValidMarker}, \acs{Z} 4-19).
 
-\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/isValidMarker();} überprüft, ob der übergebene Marker gesucht wird \acs{bzw} valide ist}, label={lst:isValidMarker}]
+\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/isValidMarker()} überprüft, ob der übergebene Marker gesucht wird \acs{bzw} valide ist}, label={lst:isValidMarker}]
 bool isValidMarker(Marker &marker) {
   unsigned int rotationCount = 0;
   cv::Mat bitMask = marker.bitMask;
@@ -174,7 +174,7 @@ Grundsätzlich bezeichnet die Kamerakalibrierung ein Verfahren, das die Paramete
 
 Die Applikation ermöglicht dem Endnutzer eine Kamerakalibrierung durchzuführen (\acs{s} \acs{lst} \ref{lst:EvalCalibration}, \acs{Z} 8), zu berechnen (\acs{s} \acs{lst} \ref{lst:EvalCalibration}, \acs{Z} 4) und zu laden (\acs{s} \acs{lst} \ref{lst:EvalCalibration}, \acs{Z} 6). Insgesamt muss mindestens einmal eine Kamerakalibrierung durchgeführt werden. Alle drei Techniken werden in den nächsten Abschnitten beschrieben. Bevor eine Kalibrierung gestartet werden kann, muss das Kalibriermuster (\acs{s} \acs{abb} \ref{fig:ChessboardPattern}) vom Endbenutzer ausgedruckt und die Kantenlänge eines Felds in Metern ermittelt werden.
 
-\begin{lstlisting}[caption={Ein Ausschnitt der Funktion \texttt{camera.cpp/initializeCamera();} die überprüft, auf welche Art und Weise die Kamerakalibrierung durchgeführt werden soll}, label={lst:EvalCalibration}]
+\begin{lstlisting}[caption={Ein Ausschnitt der Funktion \texttt{camera.cpp/initializeCamera()}, die überprüft, auf welche Art und Weise die Kamerakalibrierung durchgeführt werden soll}, label={lst:EvalCalibration}]
 // cc = Camera Calibration Settings
 if (cc.cameraName.empty()) {
   if (calibrationImages.size() > 0) {
@@ -186,6 +186,10 @@ if (cc.cameraName.empty()) {
   }
 }
 \end{lstlisting}
+
+\noindent Im Rahmen der Bearbeitung dieser Dokumentation war es nicht mehr möglich gewesen, verwertbare Daten aus einer Kamerakalibrierung zu erhalten. In der Vergangenheit konnte eine Kamerakalibrierung erfolgreich durchgeführt werden. Dies bezeugt das \acs{lst} \ref{lst:cccFile}, da dies die Kamerakalibrierung der Logitech c525 HD Webcam ist, die für die Entwicklung dieser Applikation verwendet wurde. Irritierend ist, dass laut der Historie der Versionsverwaltung die entsprechenden Code-Abschnitte im Anschluss nicht mehr geändert wurden.
+
+\newpage
 
 \subsubsection{Berechnung der Kamerakalibrierung zur Laufzeit}\label{sssec:kaliRuntime}
 Falls die Applikation ohne Pfadangabe einer Kalibrierungsdatei (\acs{s} \acs{abs} \ref{sssec:lokalfile}) oder der Pfadangabe eines Ordners (\acs{s} \acs{abs} \ref{sssec:lokalkali}), der Bilder von Ansichten eines Kalibriermusters speichert, aufgerufen wird, startet die Kamerakalibrierung zur Laufzeit automatisch. Die Live-Kamerakalibrierung wird von der Funktion \texttt{camera.cpp/startCameraCalibration()} realisiert. Innerhalb dieses Abschnitts wird mit Verweisen auf bestimmte Dateizeilen gearbeitet, da die Funktion \texttt{startCameraCalibration()} mehr als 80 Zeilen lang ist.
@@ -208,10 +212,11 @@ Falls die Applikation ohne Pfadangabe einer Kalibrierungsdatei (\acs{s} \acs{abs
 
 \noindent Für eine gute Kamerakalibrierung wird eine Anzahl von mindestens 50 Bildern empfohlen. Sämtliche bestätigte Bilder werden zur Laufzeit im Projektunterorder \glqq \texttt{Images/CameraCalibration/}\grqq{} zwischengespeichert (\acs{s} \acs{dat} \texttt{camera.cpp}, \acs{Z} 251) und können in einem späteren Zeitpunkt wiederverwendet werden (\acs{s} \acs{abs} \ref{sssec:lokalkali}). Der Endbenutzer kann anschließend mit der Eingabetaste die Anzahl an gemachten Bildern bestätigen und die Berechnung der Kamerakalibrierung starten. An dieser Stelle werden alle 2D-Bildpunkte der gefundenen Kreuzungen im Kalibriermuster der Funktion \texttt{camera.cpp/calibrateCamera()} weitergeleitet, die daraufhin die eigentliche Kamerakalibrierung berechnet und das Ergebnis als Referenzparameter zurückliefert (\acs{s} \acs{lst} \ref{lst:calibrateCamera}). Die vom Nutzer eingegebene Kantenlänge eines Feldes im Kalibriermuster wird nun verwendet, um das Kalibriermuster dreidimensional nachzustellen (\acs{s} \acs{lst} \ref{lst:calibrateCamera}, \acs{Z} 6). Die 2D-Bildpunkte und die dazugehörigen 3D-Punkte werden der OpenCV-Funktion \texttt{calibrateCamera()} bereitgestellt, die dann daraus die intrinsischen und extrinsischen Kameraparameter berechnet (\acs{s} \acs{lst} \ref{lst:calibrateCamera}, \acs{Z} 8).
 
-\begin{lstlisting}[caption={Die Funktion \texttt{camera.cpp/calibrateCamera();} berechnet anhand von übergebenen 2D-Bildpunkten eines Kalibriermusters die intrinsischen und extrinsischen Kameraparameter}, label={lst:calibrateCamera}]
+\newpage
+
+\begin{lstlisting}[caption={Die Funktion \texttt{camera.cpp/calibrateCamera()} berechnet anhand von übergebenen 2D-Bildpunkten eines Kalibriermusters die intrinsischen und extrinsischen Kameraparameter}, label={lst:calibrateCamera}]
 void calibrateCamera(CameraCalibration &cc, const std::vector<std::vector<cv::Point2f>> &chessboardImageSpacePoints)
 {
-  std::cout << "Compute camera calibration..." << std::endl;
   std::vector<cv::Mat> rVec, tVec;
   std::vector<std::vector<cv::Point3f>> worldSpaceCornerPoints(1);
   createKnownBoardPosition(DEFAULT_CC_CHESSBOARD_SIZE, cc.chessboardRealTileEdgeLength, worldSpaceCornerPoints[0]);
@@ -220,7 +225,7 @@ void calibrateCamera(CameraCalibration &cc, const std::vector<std::vector<cv::Po
 }
 \end{lstlisting}
 
-\noindent Abschließend werden die berechneten Daten mittels der Funktion \texttt{camera.cpp/saveCameraCalibration()} in eine lokale Kalibrierungsdatei im Projektunterordner \glqq \texttt{Resources/}\grqq{} abgespeichert, die beim Start der Applikation mitgeliefert werden kann (\acs{s} \acs{abs} \ref{sssec:lokalfile}). Wie solch eine Kalibrierungsdatei für diese Applikation strukturiert ist, wird im \acs{lst} \ref{lst:cccFile} beschrieben und der \acs{tab} \ref{tab:cccFile} näher erläutert.
+\noindent Abschließend werden die berechneten Daten mittels der Funktion \texttt{saveCameraCalibration()}, die in der Datei \texttt{camera.cpp} wiederzufinden ist, in eine lokale Kalibrierungsdatei im Projektunterordner \glqq \texttt{Resources/}\grqq{} abgespeichert, die beim Start der Applikation mitgeliefert werden kann (\acs{s} \acs{abs} \ref{sssec:lokalfile}). Wie solch eine Kalibrierungsdatei für diese Applikation strukturiert ist, wird im \acs{lst} \ref{lst:cccFile} beschrieben und der \acs{tab} \ref{tab:cccFile} näher erläutert.
 
 \subsubsection{Berechnung der Kamerakalibrierung aus lokalen Bildern}\label{sssec:lokalkali}
 Wie zuvor im \acs{abs} \ref{sssec:kaliRuntime} beschrieben, werden bestätigte Bilder, die ein gefundenes Kalibiermuster aufweisen, zwischengespeichert und können wiederverwendet werden. Der Endnutzer muss lediglich beim Start der Applikation den Pfad zum Ordner mitliefern, in dem die zwischengespeicherten Bilder liegen (\acs{s} \acs{abs} \ref{sec:BedienungApplikation}). Es wird empfohlen ein Ordner anzugeben, der nur Bilder beinhaltet und keine anderen Dateiformate. Letztendlich wird der im \acs{abs} \ref{sssec:kaliRuntime} beschriebene Prozess wiederholt, mit dem Unterschied, dass die Kamerakalibrierung direkt ausgeführt und aus den gelieferten Bildern berechnet wird. In diesem Fall wird beim Aufruf der OpenCV-Funktion \texttt{findChessboardCorners()}, die das Kalibriermuster innerhalb der mitgelieferten Bilder findet, auf den Parameter \texttt{CV\_CALIB\_CB\_FAST\_CHECK} verzichtet, da im Vergleich zur Live-Kalibrierung die erhaltenen Bilder einer Webcam nicht dargestellt werden müssen und folglich ein schnelles finden des Kalibriermusters im Bild nicht notwendig ist.
@@ -283,7 +288,7 @@ Logitech720p
 
 \subsubsection{3D-Rekonstruktion}\label{sssec2drekonstruktion}
 Damit ein virtuelles 3D-Objekt in einer Bildszene platziert werden kann, muss die Objektposition in Bezug auf die Kamera bekannt sein. Im Rahmen der Applikation wird eine euklidische Transformation im kartesischen Koordinatensystem verwendet, um die Objektposition darzustellen. Die Position des Markers in 3D (Model Space) und seine entsprechende Projektion in 2D (View Space, Kamerakoordinaten) wird durch die folgende Gleichung\footcite[Vgl.][\ac{S} 76]{Baggio2012} dargestellt:
-\Large $$p' = C[R|T]p$$
+\Large $$sp' = C[R|T]p$$
 \normalsize
 \centerline{oder}\footcite{opencv3DReconstruction}
 \begin{equation*}
@@ -323,7 +328,9 @@ Wo:
 
 \noindent Nach der Durchführung der Detektion der Marker und der Kamerakalibrierung sind zum einen die genauen Positionen der Marker im Window Space bekannt, zum anderen sind die in- und extrinsischen Kameraparameter ermittelt. Beide Informationen werden anschließend für die Approximation einer euklidischen Transformation zwischen der Kamera und einem Marker im dreidimensionalen Raum verwendet. Das \acs{lst} \ref{lst:estimatePos} zeigt die Funktion \texttt{estimatePosition()}, die die gesuchte euklidische Transformation zwischen der Kamera und einem Marker im dreidimensionalen Raum bestimmt. 
 
-\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/estimatePosition();} bestimmt die Lage eines Markers im dreidimensionalen Raum im Bezug auf die Kamera}, label={lst:estimatePos}]
+\newpage
+
+\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/estimatePosition()} bestimmt die Lage eines Markers im dreidimensionalen Raum im Bezug auf die Kamera}, label={lst:estimatePos}]
 void estimatePosition(Marker &marker, const CameraCalibration &cc) {
   cv::Mat raux, taux;
   cv::Mat rotationVector;
@@ -339,7 +346,7 @@ void estimatePosition(Marker &marker, const CameraCalibration &cc) {
 
 \noindent Die Funktion \texttt{estimatePosition()} wird für jeden detektierten Marker aufgerufen und die extrinsischen Parameter des Markers im Bezug auf die Kamera approximiert. Den Kern der Funktion bildet der Aufruf der OpenCV-Funktion \texttt{solvpnp()} (\acs{s} \acs{lst} \ref{lst:estimatePos}, \acs{Z} 5), die die Lage eines Objekts aus 2D- und 3D-Punktpaaren findet.\footcite{opencvsolvePnP} Hierfür benötigt die OpenCV-Funktion die Eckpunkte des Markers im dreidimensionalen Raum, die dazu korrespondierenden Eckpunkte des Markers im View Space und die Kameramatrix. Wie im \acs{abs} \ref{sssec:kaliRuntime} beschrieben, wird der Nutzer zu Beginn der Kamerakalibrierung aufgefordert die reale Kantenlänge eines Markers in Metern anzugeben (\acs{s} \acs{abb} \ref{fig:startTerminalkali}, \acs{Z} 8). Mithilfe der eingegebenen Kantenlänge ermittelt die Funktion \texttt{getMarker3DPoints()} die Punkte des Markers im dreidimensionalen Raum. Letztendlich werden die Eckpunkte eines Markers gleichmäßig um den Mittelpunkt verteilt (\acs{s} \acs{lst} \ref{lst:getMarker3DPoints}).
 
-\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/getMarker3DPoints();} bestimmt die Position eines Markers im dreidimensionalen Raum}, label={lst:getMarker3DPoints}]
+\begin{lstlisting}[caption={Die Funktion \texttt{detectormarkerbased.cpp/getMarker3DPoints()} bestimmt die Position eines Markers im dreidimensionalen Raum}, label={lst:getMarker3DPoints}]
 std::vector<cv::Point3f> getMarker3DPoints(const float &markerRealEdgeLength) {
   return {cv::Point3f(markerRealEdgeLength * -0.5f, markerRealEdgeLength * 0.5f, 0.0f),
           cv::Point3f(markerRealEdgeLength * -0.5f, markerRealEdgeLength * -0.5f, 0.0f),
@@ -359,9 +366,11 @@ Die endgültige Bildausgabe ist mittels OpenGL realisiert und in drei Phasen auf
 \item Aktuelle Marker-Positionen als Modelview-Matrix laden, virtuelles 3D-Objekt zeichnen und mittels einer perspektivischen Matrix in den Window Space projizieren
 \end{enumerate}
 
-\noindent Nach der erfolgreichen Registrierung sämtlicher Callback-Funktionen, startet die Ereignisverarbeitungsschleife von OpenGL. Innerhalb der Ereignisverarbeitungsschleife spielen zwei Callback-Funktionen, \texttt{timerCallback()} (\acs{s} \acs{dat} \texttt{rendering3d.cpp}, \acs{Z} 543) und \texttt{drawCallback()} (\acs{s} \acs{dat} \texttt{rendering3d.cpp}, \acs{Z} 421) eine wichtige Rolle. In der \texttt{timerCallback()}-Funktion wird die Detektion von Markern angestoßen, gefundene Marker in einem globalen Vektor abgespeichert, die verarbeitete Bildszene global gesichert und letztlich die Szene im OpenGL-Kontext gezeichnet. Die detektierten Marker und die aktuelle Bildszene müssen als globale Variablen deklariert werden, damit diese in sämtliche Callback-Funktionen zur Verfügung stehen. Innerhalb der Funktion \texttt{drawCallback()} wird zu Beginn die verarbeitete Bildszene als Hintergrund gezeichnet. Dies wird mittels der Funktion \texttt{drawBackground()} (\acs{s} \acs{dat} \texttt{rendering3d.cpp}, \acs{Z} 333) realisiert.
+\noindent Nach der erfolgreichen Registrierung sämtlicher Callback-Funktionen, startet die Ereignisverarbeitungsschleife von OpenGL. Innerhalb der Ereignisverarbeitungsschleife spielen zwei Callback-Funktionen, \texttt{timerCallback()} (\acs{s} \acs{dat} \texttt{rendering3d.cpp}, \acs{Z} 542) und \texttt{drawCallback()} (\acs{s} \acs{dat} \texttt{rendering3d.cpp}, \acs{Z} 420) eine wichtige Rolle. In der \texttt{timerCallback()}-Funktion wird die Detektion von Markern angestoßen, gefundene Marker in einem globalen Vektor abgespeichert, die verarbeitete Bildszene global gesichert und letztlich die Szene im OpenGL-Kontext gezeichnet. Die detektierten Marker und die aktuelle Bildszene müssen als globale Variablen deklariert werden, damit diese in sämtliche Callback-Funktionen zur Verfügung stehen. Innerhalb der Funktion \texttt{drawCallback()} wird zu Beginn die verarbeitete Bildszene als Hintergrund gezeichnet. Dies wird mittels der Funktion \texttt{drawBackground()} (\acs{s} \acs{dat} \texttt{rendering3d.cpp}, \acs{Z} 332) realisiert.
 
-\begin{lstlisting}[caption={Die Funktion \texttt{rendering3d.cpp/drawBackground();} zeichnet den Inhalt des aktuell verarbeiteten Bilds auf eine 2D-Ebene, die orthogonal zu Kamera steht}, label={lst:drawBackground}]
+\newpage
+
+\begin{lstlisting}[caption={Die Funktion \texttt{rendering3d.cpp/drawBackground()} zeichnet den Inhalt des aktuell verarbeiteten Bilds auf eine 2D-Ebene, die orthogonal zu Kamera steht}, label={lst:drawBackground}]
 void drawBackground(void) {
   glEnable(GL_TEXTURE_2D);
   glGenTextures(1, &bgTexId);
@@ -384,7 +393,9 @@ void drawBackground(void) {
 
 Nachdem die Bildszene als Hintergrund in den Framebuffer geschrieben wurde, müssen anschließend virtuelle 3D-Objekte an den gefundenen Markerpositionen gezeichnet werden. Hierfür wurde die Funktion \texttt{drawAR()} (\acs{s} \acs{dat} \texttt{rendering3d.cpp}, \acs{Z} 282) implementiert.
 
-\begin{lstlisting}[caption={Die Funktion \texttt{rendering3d.cpp/drawAR();} zeichnet über gefundenen Markern 3D-Objekte}, label={lst:drawAR}]
+\newpage
+
+\begin{lstlisting}[caption={Die Funktion \texttt{rendering3d.cpp/drawAR()} zeichnet über gefundenen Markern 3D-Objekte}, label={lst:drawAR}]
 void drawAR(void) {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
@@ -414,7 +425,9 @@ void drawAR(void) {
 
 \noindent Im Rahmen der Initialisierung des OpenGL-Kontextes wurde der Tiefentest bewusst nicht eingeschaltet, da Objekte mit unterschiedlichen Projektionen gezeichnet werden. Beim eingeschlatenen Tiefentest würde demzufolge der zuvor gezeichnete Hintergrund immer im Vordergrund liegen und die nachfolgenden 3D-Objekte verdecken, da der Hintergrund mittels einer orthogonalen Projektion gezeichnet wurde und folglich direkt vor der Kamera positioniert ist. Aus diesem Grund wird der Tiefentest nur im Rahmen der Zeichnung der 3D-Objekte eingeschaltet (\acs{s} \acs{lst} \ref{lst:drawAR}, \acs{Z} 2-3 und 24). Um 3D-Objekte zeichnen zu können, benötigen wir eine perspektivische Projektion in Bezug auf den intrinsischen Kameraparametern, die die Kamerakalibrierung ergeben hat (\acs{s} \acs{lst} \ref{lst:drawAR}, \acs{Z} 4-10). Die Funktion \texttt{makePerspective()} (\acs{s} \acs{lst} \ref{lst:makePerspective}) erzeugt hierfür anhand der übergebenen intrinsischen Parameter eine perspektivische Transformationsmatrix im OpenGL-Kontext, die Koordinaten im View Space in den Window Space überführt.
 
-\begin{lstlisting}[caption={Die Funktion \texttt{algebra.cpp/makePerspective();}, die anhand von intrinsischen Parametern eine perspektivische Projektionsmatrix im OpenGL-Kontext erzeugt}, label={lst:makePerspective}]
+\newpage
+
+\begin{lstlisting}[caption={Die Funktion \texttt{algebra.cpp/makePerspective()}, die anhand von intrinsischen Parametern eine perspektivische Projektionsmatrix im OpenGL-Kontext erzeugt}, label={lst:makePerspective}]
 Mat4 makePerspective(const float &fx, const float &fy, const float &cx, const float &cy, const int &w, const int &h, const float &near, const float &far)
 {
   return makeMatRows(
@@ -425,13 +438,14 @@ Mat4 makePerspective(const float &fx, const float &fy, const float &cx, const fl
 }
 \end{lstlisting}
 
-\noindent Wie im \acs{lst} \ref{lst:getMarker3DPoints} beschrieben, wurden die dreidimensionalen Eckpunkte eines Markers um den Mittelpunkt gesetzt. Im Rahmen der 3D-Rekonstruktion (\acs{s} \acs{abs} \ref{sssec2drekonstruktion}) wurden diese 3D-Punkte auf die korrespondierenden 2D-Bildpunkte der gefundenen Marker projiziert.
+\noindent Wie im \acs{lst} \ref{lst:getMarker3DPoints} beschrieben, wurden die dreidimensionalen Eckpunkte eines Markers um den Mittelpunkt gesetzt. Im Rahmen der 3D-Rekonstruktion (\acs{s} \acs{abs} \ref{sssec2drekonstruktion}) wurden diese 3D-Punkte auf die korrespondierenden 2D-Bildpunkte der gefundenen Marker projiziert. Die daraus resultierende Rotationsmatrix \acs{bzw} resultierender Translationsvektor werden nun benötigt, um den entsprechenden Mittelpunkt des Markers im Model Space zu finden. Die Kombination der beiden extrinsischen Parameter bildet die Modelview-Matrix des jeweiligen Markers. Bei der Erzeugung der Modelview-Matrix muss berücksichtigt werden, dass Matrizen im OpenCV-Kontext reihenweise und im OpenGL-Kontext spaltenweise gespeichert werden. Folglich ist eine Transponierung der Matrix notwendig. Anschließend wird die Transformationsmatrix als Modelview-Matrix geladen und entsprechende Zeichenroutinen von OpenGL können ausgeführt werden, um 3D-Objekte auf Markern zu zeichnen (\acs{s} \acs{abb} \ref{fig:endproduct}).
 
-TODO ROTATIONSMATRIX AUCH TRANSPONIEREN?
-
-Die daraus resultierende Rotationsmatrix \acs{bzw} resultierender Translationsvektor werden nun benötigt, um den entsprechenden Mittelpunkt des Markers im Model Space zu finden. Die Kombination der beiden extrinsischen Parameter bildet die Modelview-Matrix des jeweiligen Markers. Bei der Erzeugung der Modelview-Matrix muss berücksichtigt werden, dass Matrizen im OpenCV-Kontext reihenweise und im OpenGL-Kontext spaltenweise gespeichert werden. Folglich ist eine Transponierung der Matrix notwendig. Anschließend wird die Transformationsmatrix als Modelview-Matrix geladen und entsprechende Zeichenroutinen von OpenGL können ausgeführt werden, um 3D-Objekte auf Markern zu zeichnen (\acs{s} \acs{abb} \ref{fig:}).
-
-TODO BILD VOM ENDPRODUKT
+\begin{figure}[H]
+\centering
+\includegraphics[width=15cm]{Bilder/Implementierung/endproduct.png}
+\caption{Darstellung der endgültigen Bildausgabe mit der Zeichnung von dreidimensionalen Objekten}
+\label{fig:endproduct}
+\end{figure}
 
 \subsection{Kollisionserkennung von 3D-Objekten}\label{kollitionerkennungnnnn}
 Aus diversen Gründen konnte eine Kollisionserkennung nicht implementiert werden. Aus diesem Grund wird in diesem \acs{abs} beschrieben warum die Implementierung der Kollisionserkennung nicht möglich war und welche Lösungsansätze getestet wurden. Alle Code-Ausschnitte der getesteten Lösungsansätze sind nicht im abgegebenen Projektquellcode enthalten. Nichtsdestotrotz werden die wichtigsten Codebeispiele in diesem \acs{abs} erläutert.
@@ -440,7 +454,11 @@ Der Plan vor der Implementierung der Kollisionserkennung bildete die Verwaltung 
 
 Die erfolgversprechendste Lösung bildete das Hinzufügen eines neuen Marker-Typs, der das Zentrum des Spielfelds darstellt. Das globale Ziel bildet, dass sich sämtliche Marker im gleichen Koordinatensystem befinden, um eine Relation zwischen einzelnen Markern zu schaffen. Mit genau einem Marker, der das Zentrum des Koordinatensystems darstellt, gibt es die Möglichkeit Objekte zu definieren die alle im gleichen Koordinatensystem liegen. Folglich wäre eine Kollisionserkennung möglich. Nichtsdestotrotz ist dieser Ansatz nur dann möglich wenn in der Bildszene nur ein Marker \acs{bzw} ein Koordinatensystem existiert.
 
-Ein globales Teilziel bildet die gleichzeitige Verwendung von verschiedenen Marker, die untereinander interagieren können. Der zuvor beschriebene Ansatz mit der Deklaration eines neuen Marker-Typs ist eine weitere Lösung denkbar. Hierbei wird die inverse 3D-Rekonstruktion des neuen Marker-Typs verwendet, um die 2D-Bildpunkte anderer Marker ins Koordinatensystem des neuen Marker-Typs zu transferieren. Folglich wären sämtliche Marker im gleichen Koordinatensystem \acs{bzw} im Koordinatensystem des neuen Marker-Typs. Hierfür müsste der Algorithmus wie folgt angepasst werden:
+Ein globales Teilziel bildet die gleichzeitige Verwendung von verschiedenen Marker, die untereinander interagieren können. Der zuvor beschriebene Ansatz mit der Deklaration eines neuen Marker-Typs ist eine weitere Lösung denkbar. Hierbei wird die inverse 3D-Rekonstruktion des neuen Marker-Typs verwendet, um die 2D-Bildpunkte anderer Marker ins Koordinatensystem des neuen Marker-Typs zu transferieren. 
+
+\newpage
+
+Folglich wären sämtliche Marker im gleichen Koordinatensystem \acs{bzw} im Koordinatensystem des neuen Marker-Typs. Hierfür müsste der Algorithmus wie folgt angepasst werden:
 
 \begin{enumerate}
 \item Die Suche von Markern im der Bildszene bleibt erhalten
@@ -451,12 +469,13 @@ Ein globales Teilziel bildet die gleichzeitige Verwendung von verschiedenen Mark
 
 \noindent Dieser Ansatz wurde in groben Zügen implementiert, um den allgemeinen Prozess testen zu können. Für die inverse 3D-Rekonstruktion wird die Funktion \texttt{get3DPoint()} (\acs{s} \acs{lst} \ref{lst:get3DPoint}) benötigt, die einen übergebenen Marker im View Space in die korrespondierende 3D-Koordinate im Model Space des zentralen Markers umwandelt. 
 
-\begin{lstlisting}[caption={Die Funktion \texttt{get3DPoint();}, die einen übergebenen Marker im View Space mittels einer inversen Transformation in den Model Space des zentralen Markers transformiert und nicht Bestandteil des Projektquellcodes ist}, label={lst:get3DPoint}]
+\begin{lstlisting}[caption={Die Funktion \texttt{get3DPoint()}, die einen übergebenen Marker im View Space mittels einer inversen Transformation in den Model Space des zentralen Markers transformiert und nicht Bestandteil des Projektquellcodes ist}, label={lst:get3DPoint}]
 void get3DPoint(const Marker &marker, cv::Point3f realPoint) {
   cv::Mat imagePoint = cv::Mat::ones(3, 1, cv::DataType<double>::type);
-  imagePoint.at<double>(0, 0) = marker.points[0].x;
-  imagePoint.at<double>(1, 0) = marker.points[0].y;
-  cv::Mat m = rotationMatrix.inv() * cc.cameraMatrix.inv() * uvPoint;
+  cv::Rect markerRect = cv::boundingRect(marker.points);
+  imagePoint.at<double>(0, 0) = markerRect.x + (markerRect.width / 2);
+  imagePoint.at<double>(1, 0) = markerRect.y + (markerRect.height / 2);
+  cv::Mat m = rotationMatrix.inv() * cc.cameraMatrix.inv() * imagePoint;
   cv::Mat m2 = rotationMatrix.inv() * translationVector;
   double s = m2.at<double>(2, 0);
   s /= m.at<double>(2, 0);
@@ -467,12 +486,18 @@ void get3DPoint(const Marker &marker, cv::Point3f realPoint) {
 }
 \end{lstlisting}
 
-\noindent Letztendlich muss die im \acs{abs} \ref{sssec2drekonstruktion} beschriebene Gleichung in folgende umgewandelt werden, um einen 2D-Bildpunkt in einen dazugehörigen 3D-Punkt umzurechnen:
+\newpage
 
-TODO GLEICHUNG WIEDERFINDEN UND BESCHREIBEN... BESCHREIBUNG FÜR S FEHLT
+\noindent Letztendlich muss die im \acs{abs} \ref{sssec2drekonstruktion} beschriebene Gleichung in folgende umgewandelt werden, um einen 2D-Bildpunkt in einen dazugehörigen 3D-Punkt umzurechnen\footcite{recontructioninverse}:
+\Large $$R^{-1}C^{-1}sp' = p+R^{-1}T$$
+\normalsize
+Die semantische Bedeutung einzelner Variablen ist aus der Gleichung im \acs{abs} \ref{sssec2drekonstruktion} zu entnehmen. Für einen grafischen Test wurde versucht der Mittelpunkt (\acs{s} \acs{lst} \ref{lst:get3DPoint}, \acs{Z} 3-5) eines gefundenen Markers im View Space in den Model Space des zentralen Markers umzuwandeln. Wie die \acs{abb} \ref{fig:testing_failed} zeigt, liegt der zentrale Marker im Zentrum des Bildes. Auf den zentralen Marker werden zur Orienterung Achsen eines Koordinatensystems gezeichnet. Um den zentralen Marker herum sind weitere Marker vom selben Typ platziert, wobei man klar erkennen kann, dass die grünen Kugeln nicht im Zentrum der Marker liegen. Der Grund für den Versatz der Position des 3D-Objektes könnte an einer falschen Skalierung der Transformationsmatrizen liegen, da die Position eines virtuelles Objekt korrekter wird je näher sie im Zentrum des Bildes liegt, oder aber an der Verzerrung des Bildes liegen, die durch die Kamera erzeugt wurde, wobei beides nur Vermutungen sind und aus zeitkritischen Gründen nicht näher geprüft werden können.
 
-Für einen grundsätzlichen Test wurde versucht ein Eckpunkt eines gefundenen Markers im View Space in den Model Space des zentralen Markers umzuwandeln. Wie die \acs{abb} zeigt, liegt die graue Kugel, die den BLAUEN? 2D-Eckpunkt des Markers im dreidimensionalen Raum darstellen soll, nicht im korrespondierenden 2D-Punkt des Markers. Beim Versuch die Position des gefundenen Markers zu verschieben, bewegt sich die graue 3D-Kugel in die korrekte Richtung mit, obwohl sie dennoch nicht im korrespondieren 2D-Bildpunkt liegt. Der Grund für den Versatz der Position des 3D-Objektes könnte an der Verzerrung des Bildes liegen, die durch die Kamera erzeugt wurde, wobei dies nur eine Vermutung ist und aus zeitkritischen Gründen nicht näher geprüft werden kann.
-
-TODO ABBILDUNGEN VOM TEST
+\begin{figure}[H]
+\centering
+\includegraphics[width=15cm]{Bilder/Implementierung/testing_failed.png}
+\caption{Darstellung der Bildausgabe nach der Implementierung eines Lösungsansatzes für die Kollisionserkennung}
+\label{fig:testing_failed}
+\end{figure}
 
 \newpage

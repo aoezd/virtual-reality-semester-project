@@ -281,7 +281,6 @@ void drawCar(void)
  */
 void drawAR(void)
 {
-
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 

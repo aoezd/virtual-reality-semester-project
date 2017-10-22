@@ -49,7 +49,14 @@ Der gesamte Projektquellcode ist auf GitHub öffentlich verfügbar\footnote{Das 
     \item \texttt{-ccl, --cameracalibrationload [Pfad zur Kalibrierungsdatei]}: Lädt die Kamerakalibrierung aus der übergebenen Datei.
 \end{itemize}
 
-\noindent Falls die Applikation ohne die Angabe eines Eingabeparameters ausgeführt wird, startet eine Live-Kamerakalibrierung (\acs{s} \acs{abs} \ref{sssec:kaliRuntime}) automatisch und als Standard definierte Marker werden geladen. Mithilfe der Taste \glqq \texttt{h}\grqq{} können zur Laufzeit weitere Informationen ausgespielt werden (siehe BILD TODO).
+\noindent Falls die Applikation ohne die Angabe eines Eingabeparameters ausgeführt wird, startet eine Live-Kamerakalibrierung (\acs{s} \acs{abs} \ref{sssec:kaliRuntime}) automatisch und als Standard definierte Marker werden geladen. Mithilfe der Taste \glqq \texttt{h}\grqq{} können zur Laufzeit weitere Informationen ausgespielt werden (\acs{s} \acs{abb} \ref{fig:HelpShow}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=13cm]{Bilder/BedienungDerApplikation/Hilfe.png}
+\caption{Darstellung der Hilfeausgabe zur Laufzeit}
+\label{fig:HelpShow}
+\end{figure}
 
 \subsection{Systemeinstellungen zurzeit der Entwicklung}
 Die Applikation wurde auf einem System mit folgenden Eigenschaften entwickelt und getestet:
@@ -70,9 +77,9 @@ Die Applikation wurde auf einem System mit folgenden Eigenschaften entwickelt un
 \hline
 \verb|Grafikkartenspeicher| & 3.5 GB\\
 \hline
-\verb|OpenGL-Version| & TODO\\
+\verb|OpenGL-Version| & 3.3\\
 \hline
-\verb|OpenCV-Version| & TODO\\
+\verb|OpenCV-Version| & 3.1.0\\
 \hline
 \end{tabular}
 \caption{Beschreibung der Systemeinstellungen zurzeit der Entwicklung}
