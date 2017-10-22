@@ -1,0 +1,101 @@
+% Bilder[gr: 16cm; kl: 10cm] Tabelle[all: 15cm] - Alles \centering
+\documentclass[a4paper, 11pt]{scrartcl}
+
+\usepackage[ngerman]{babel}
+\usepackage{setspace}
+\usepackage{verbatimbox}
+\usepackage[utf8]{inputenc}
+\usepackage{tocbibind}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{verbose,a4paper,tmargin=25mm,bmargin=40mm,lmargin=25mm,rmargin=25mm}
+\usepackage[printonlyused]{acronym}
+\usepackage[backend=biber, style=authoryear, citestyle=authoryear-icomp]{biblatex}
+\usepackage[babel,german=guillemets]{csquotes}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{textcomp}
+\usepackage{multirow}
+\usepackage{amsmath}
+\addbibresource{./Literaturverzeichnis/Literaturverzeichnis.bib}
+
+\begin{document}
+
+\renewcommand{\figurename}{Abb.}
+\renewcommand{\tablename}{Tab.}
+\renewcommand{\lstlistingname}{List.}
+
+\onehalfspacing
+
+\renewcommand\lstlistlistingname{Listings-Verzeichnis}
+
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\definecolor{Darkgreen}{rgb}{0.0,0.4,0.0}
+\lstset{
+backgroundcolor=\color{lbcolor},
+tabsize=4,
+language=[GNU]C++,
+basicstyle=\scriptsize,
+upquote=true,
+aboveskip={1.5\baselineskip},
+columns=fixed,
+showstringspaces=false,
+extendedchars=false,
+breaklines=true,
+prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+numbers=left,
+showtabs=false,
+showspaces=false,
+showstringspaces=false,
+identifierstyle=\ttfamily,
+keywordstyle=\color[rgb]{0,0,1},
+commentstyle=\color[rgb]{0.026,0.112,0.095},
+stringstyle=\color[rgb]{0.627,0.126,0.941},
+numberstyle=\color[rgb]{0.205, 0.142, 0.73}
+}
+\lstset{
+backgroundcolor=\color{lbcolor},
+tabsize=4,
+language=C++,
+captionpos=b,
+tabsize=3,
+numbers=left,
+numberstyle=\tiny,
+numbersep=5pt,
+breaklines=true,
+showstringspaces=false,
+basicstyle=\footnotesize,
+%  identifierstyle=\color{magenta},
+keywordstyle=\color[rgb]{0,0,1},
+commentstyle=\color{Darkgreen},
+stringstyle=\color{red},
+literate=%
+  {Ö}{{\"O}}1
+  {Ä}{{\"A}}1
+  {Ü}{{\"U}}1
+  {ß}{{\ss}}1
+  {ü}{{\"u}}1
+  {ä}{{\"a}}1
+  {ö}{{\"o}}1
+}
+
+
+\input{./Kapitel/Deckblatt}
+
+\input{./Kapitel/Verzeichnisse}
+
+\input{./Kapitel/ZielsetzungUndVorgehensweise}
+
+\input{./Kapitel/Implementierung}
+
+\input{./Kapitel/BedienungDerApplikation}
+
+\input{./Literaturverzeichnis/Literaturverzeichnis}
+
+\input{./Kapitel/EidesstattlicheErklaerung}
+
+\end{document}
