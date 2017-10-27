@@ -358,6 +358,7 @@ void drawBackground(void)
     glColor4f(1, 1, 1, 1);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+    glDeleteTextures(1, &bgTexId);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -559,6 +560,7 @@ void timerCallback(int last)
     intervalRotation += interval;
 
     dm.clear();
+    bg.release();
     processMarkerDetection(dm, bg, app, cc);
 
     glutTimerFunc(1000.0f / TIMER_CALLS_PS, timerCallback, now);
@@ -629,11 +631,9 @@ bool initializeGL(const std::string &windowName, const Application &application,
 
             return true;
         }
-        else
-        {
-			quitProgram();
-        }
     }
+
+    quitProgram();
 
     return false;
 }

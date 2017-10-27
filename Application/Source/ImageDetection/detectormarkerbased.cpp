@@ -404,13 +404,8 @@ bool getValidMarkersInFrame(Application &app, const cv::Mat &source, cv::Mat &re
                     app.validMarkerCount++;
                 }
             }
-            
-            thresholdMarker.release();
         }
     }
-    
-    grayscale.release();
-    threshold.release();
 
     return validMarkers.size() > 0;
 }
@@ -453,8 +448,6 @@ void processMarkerDetection(std::vector<Marker> &detectedMarkers, cv::Mat &resul
                 estimatePosition(marker, cc);
             }
         }
-
-        frame.release();
     }
     else
     {
