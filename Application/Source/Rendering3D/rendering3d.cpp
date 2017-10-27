@@ -25,6 +25,7 @@ double interval;
 double intervalRotation;
 Vec2 playerTranslation;
 bool showHelp;
+unsigned int windowID = 0;
 
 /**
  * Draws coordinate axis at center.
@@ -439,7 +440,12 @@ void drawCallback(void)
 void quitProgram(void)
 {
     gluDeleteQuadric(quad);
+    releaseDefaultMarker();
     releaseCamera();
+    cc.cameraMatrix.release();
+    cc.distanceCoefficients.release();
+    bg.release();
+    glutDestroyWindow(windowID);
     exit(0);
 }
 
@@ -598,7 +604,6 @@ bool initializeScene(void)
  */
 bool initializeGL(const std::string &windowName, const Application &application, const CameraCalibration &cameraCalibration)
 {
-    unsigned int windowID = 0;
     int argc = 1;
     std::string argvCpp = "cmd";
     char *argv = (char *)(argvCpp.c_str());
@@ -626,8 +631,7 @@ bool initializeGL(const std::string &windowName, const Application &application,
         }
         else
         {
-            releaseCamera();
-            glutDestroyWindow(windowID);
+			quitProgram();
         }
     }
 

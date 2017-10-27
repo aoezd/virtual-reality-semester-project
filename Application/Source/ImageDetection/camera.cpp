@@ -177,6 +177,13 @@ void calibrateCamera(CameraCalibration &cc, const std::vector<std::vector<cv::Po
     createKnownBoardPosition(DEFAULT_CC_CHESSBOARD_SIZE, cc.chessboardRealTileEdgeLength, worldSpaceCornerPoints[0]);
     worldSpaceCornerPoints.resize(chessboardImageSpacePoints.size(), worldSpaceCornerPoints[0]);
     cv::calibrateCamera(worldSpaceCornerPoints, chessboardImageSpacePoints, DEFAULT_CC_CHESSBOARD_SIZE, cc.cameraMatrix, cc.distanceCoefficients, rVec, tVec);
+    
+    for (auto tv : tVec) {
+      tv.release();
+    }
+    for (auto rv : rVec) {
+      rv.release();
+    }
 }
 
 /**
@@ -267,7 +274,9 @@ bool startCameraCalibration(CameraCalibration &cc)
             break;
         }
     }
-
+    
+    frame.release();
+    temp.release();
     calibrateCamera(cc, chessboardImageSpacePoints);
 
     if (saveCameraCalibration(cc, DEFAULT_CC_FILEPATH + cc.cameraName + DEFAULT_CC_FILE_EXTENSION))

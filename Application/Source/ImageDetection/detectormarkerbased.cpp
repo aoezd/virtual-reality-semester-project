@@ -122,19 +122,20 @@ bool hasBlackBorder(const cv::Mat &threshold, const float &percentage)
  * @param markerImage   The actually image of marker
  * @return              true, if given image has a black border, like a marker would do
  */
-bool saveDefaultMarker(const Application &app, const unsigned int &type, const cv::Mat &markerImage)
+bool saveDefaultMarker(const Application &app, const unsigned int &type, cv::Mat markerImage)
 {
     Marker marker;
 
-    marker.image = markerImage;
-    marker.bitMask = computeBitMask(markerImage, app.percentageBitMask); // no threshold because default marker is binary
+    markerImage.copyTo(marker.image);
+    markerImage.release();
+    marker.bitMask = computeBitMask(marker.image, app.percentageBitMask); // no threshold because default marker is binary
     marker.id = computeId(marker.bitMask);
     marker.rotationCount = 0;
     marker.type = type;
 
     defaultMarkers.push_back(marker);
 
-    return hasBlackBorder(markerImage, app.percentageBlackBorder);
+    return hasBlackBorder(marker.image, app.percentageBlackBorder);
 }
 
 /**
@@ -145,7 +146,7 @@ bool saveDefaultMarker(const Application &app, const unsigned int &type, const c
  * @param markerImages  Map of all images of marker types
  * @return              true, if initialization was successful
  */
-bool initializeDetectorMarkerBased(const Application &app, const std::map<std::string, cv::Mat> &markerImages)
+bool initializeDetectorMarkerBased(const Application &app, std::map<std::string, cv::Mat> markerImages)
 {
     bool err = false;
 
@@ -154,6 +155,15 @@ bool initializeDetectorMarkerBased(const Application &app, const std::map<std::s
     err &= saveDefaultMarker(app, MARKER_TYPE_PLAYER, markerImages.at(MARKER_PLAYER));
 
     return err;
+}
+
+/**
+ * Releases all images of the default marker.
+ */
+void releaseDefaultMarker(void) {
+	for (Marker marker : defaultMarkers) {
+		marker.image.release();
+	}
 }
 
 /**
@@ -394,8 +404,13 @@ bool getValidMarkersInFrame(Application &app, const cv::Mat &source, cv::Mat &re
                     app.validMarkerCount++;
                 }
             }
+            
+            thresholdMarker.release();
         }
     }
+    
+    grayscale.release();
+    threshold.release();
 
     return validMarkers.size() > 0;
 }

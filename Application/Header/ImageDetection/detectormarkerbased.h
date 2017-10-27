@@ -27,7 +27,8 @@ typedef struct
     cv::Mat_<float> translationVector;
 } Marker; // Defines a marker which must be detected in a frame
 
-bool initializeDetectorMarkerBased(const Application &app, const std::map<std::string, cv::Mat> &markerImages);
+bool initializeDetectorMarkerBased(const Application &app, std::map<std::string, cv::Mat> markerImages);
+void releaseDefaultMarker(void);
 void processMarkerDetection(std::vector<Marker> &detectedMarkers, cv::Mat &result, Application &app, const CameraCalibration &cameraCalibration);
 
 #endif
