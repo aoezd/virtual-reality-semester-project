@@ -5,8 +5,8 @@
  * Author: Aykut Özdemir
  */
 
-#include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>

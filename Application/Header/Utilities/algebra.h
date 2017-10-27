@@ -3,10 +3,10 @@
 
 #include "../ImageDetection/camera.h"
 
-#define X 0
-#define Y 1
-#define Z 2
-#define W 3
+#define _X 0
+#define _Y 1
+#define _Z 2
+#define _W 3
 
 // --------------- Definitions of different vector types ---------------
 typedef struct

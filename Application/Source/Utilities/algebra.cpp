@@ -8,7 +8,7 @@
  */
 
 #include <iostream>
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 
 #include "../../Header/Utilities/algebra.h"
 #include "../../Header/Utilities/utils.h"
@@ -19,45 +19,45 @@ Vec2 makeVec(const float &x, const float &y)
 {
     Vec2 v;
 
-    v.data[X] = x;
-    v.data[Y] = y;
+    v.data[_X] = x;
+    v.data[_Y] = y;
 
     return v;
 }
 
 void printVec(const Vec2 &v)
 {
-    std::cout << "[" << v.data[X] << ", " << v.data[Y] << "]" << std::endl;
+    std::cout << "[" << v.data[_X] << ", " << v.data[_Y] << "]" << std::endl;
 }
 
 Vec2 add(const Vec2 &vl, const Vec2 &vr)
 {
-    return makeVec(vl.data[X] + vr.data[X], vl.data[Y] + vr.data[Y]);
+    return makeVec(vl.data[_X] + vr.data[_X], vl.data[_Y] + vr.data[_Y]);
 }
 
 Vec2 sub(const Vec2 &vl, const Vec2 &vr)
 {
-    return makeVec(vl.data[X] - vr.data[X], vl.data[Y] - vr.data[Y]);
+    return makeVec(vl.data[_X] - vr.data[_X], vl.data[_Y] - vr.data[_Y]);
 }
 
 Vec2 neg(const Vec2 &v)
 {
-    return makeVec(-v.data[X], -v.data[Y]);
+    return makeVec(-v.data[_X], -v.data[_Y]);
 }
 
 Vec2 mulScal(const float &x, const Vec2 &v)
 {
-    return makeVec(v.data[X] * x, v.data[Y] * x);
+    return makeVec(v.data[_X] * x, v.data[_Y] * x);
 }
 
 Vec2 divScal(const float &x, const Vec2 &v)
 {
-    return makeVec(v.data[X] / x, v.data[Y] / x);
+    return makeVec(v.data[_X] / x, v.data[_Y] / x);
 }
 
 float dot(const Vec2 &vl, const Vec2 &vr)
 {
-    return vl.data[X] * vr.data[X] + vl.data[Y] * vr.data[Y];
+    return vl.data[_X] * vr.data[_X] + vl.data[_Y] * vr.data[_Y];
 }
 
 float length(const Vec2 &v)
@@ -77,7 +77,7 @@ float distance(const Vec2 &vl, const Vec2 &vr)
 
 bool equal(const Vec2 &vl, const Vec2 &vr)
 {
-    return floatEqual(vl.data[X], vr.data[X]) && floatEqual(vl.data[Y], vr.data[Y]);
+    return floatEqual(vl.data[_X], vr.data[_X]) && floatEqual(vl.data[_Y], vr.data[_Y]);
 }
 
 // --------------- 3D functions ---------------
@@ -86,46 +86,46 @@ Vec3 makeVec(const float &x, const float &y, const float &z)
 {
     Vec3 v;
 
-    v.data[X] = x;
-    v.data[Y] = y;
-    v.data[Z] = z;
+    v.data[_X] = x;
+    v.data[_Y] = y;
+    v.data[_Z] = z;
 
     return v;
 }
 
 void printVec(const Vec3 &v)
 {
-    std::cout << "[" << v.data[X] << ", " << v.data[Y] << ", " << v.data[Z] << "]" << std::endl;
+    std::cout << "[" << v.data[_X] << ", " << v.data[_Y] << ", " << v.data[_Z] << "]" << std::endl;
 }
 
 Vec3 add(const Vec3 &vl, const Vec3 &vr)
 {
-    return makeVec(vl.data[X] + vr.data[X], vl.data[Y] + vr.data[Y], vl.data[Z] + vr.data[Z]);
+    return makeVec(vl.data[_X] + vr.data[_X], vl.data[_Y] + vr.data[_Y], vl.data[_Z] + vr.data[_Z]);
 }
 
 Vec3 sub(const Vec3 &vl, const Vec3 &vr)
 {
-    return makeVec(vl.data[X] - vr.data[X], vl.data[Y] - vr.data[Y], vl.data[Z] - vr.data[Z]);
+    return makeVec(vl.data[_X] - vr.data[_X], vl.data[_Y] - vr.data[_Y], vl.data[_Z] - vr.data[_Z]);
 }
 
 Vec3 neg(const Vec3 &v)
 {
-    return makeVec(-v.data[X], -v.data[Y], -v.data[Z]);
+    return makeVec(-v.data[_X], -v.data[_Y], -v.data[_Z]);
 }
 
 Vec3 mulScal(const float &x, const Vec3 &v)
 {
-    return makeVec(x * v.data[X], x * v.data[Y], x * v.data[Z]);
+    return makeVec(x * v.data[_X], x * v.data[_Y], x * v.data[_Z]);
 }
 
 Vec3 divScal(const float &x, const Vec3 &v)
 {
-    return makeVec(v.data[X] / x, v.data[Y] / x, v.data[Z] / x);
+    return makeVec(v.data[_X] / x, v.data[_Y] / x, v.data[_Z] / x);
 }
 
 float dot(const Vec3 &vl, const Vec3 &vr)
 {
-    return vl.data[X] * vr.data[X] + vl.data[Y] * vr.data[Y] + vl.data[Z] * vr.data[Z];
+    return vl.data[_X] * vr.data[_X] + vl.data[_Y] * vr.data[_Y] + vl.data[_Z] * vr.data[_Z];
 }
 
 float length(const Vec3 &v)
@@ -140,7 +140,7 @@ Vec3 normalize(const Vec3 &v)
 
 Vec3 cross(const Vec3 &vl, const Vec3 &vr)
 {
-    return makeVec(vl.data[Y] * vr.data[Z] - vl.data[Z] * vr.data[Y], vl.data[Z] * vr.data[X] - vl.data[X] * vr.data[Z], vl.data[X] * vr.data[Y] - vl.data[Y] * vr.data[X]);
+    return makeVec(vl.data[_Y] * vr.data[_Z] - vl.data[_Z] * vr.data[_Y], vl.data[_Z] * vr.data[_X] - vl.data[_X] * vr.data[_Z], vl.data[_X] * vr.data[_Y] - vl.data[_Y] * vr.data[_X]);
 }
 
 Vec3 unitCross(const Vec3 &vl, const Vec3 &vr)
@@ -155,7 +155,7 @@ float distance(const Vec3 &vl, const Vec3 &vr)
 
 bool equal(const Vec3 &vl, const Vec3 &vr)
 {
-    return floatEqual(vl.data[X], vr.data[X]) && floatEqual(vl.data[Y], vr.data[Y]) && floatEqual(vr.data[Z], vl.data[Z]);
+    return floatEqual(vl.data[_X], vr.data[_X]) && floatEqual(vl.data[_Y], vr.data[_Y]) && floatEqual(vr.data[_Z], vl.data[_Z]);
 }
 
 // --------------- 4D functions ---------------
@@ -164,47 +164,47 @@ Vec4 makeVec(const float &x, const float &y, const float &z, const float &w)
 {
     Vec4 v;
 
-    v.data[X] = x;
-    v.data[Y] = y;
-    v.data[Z] = z;
-    v.data[W] = w;
+    v.data[_X] = x;
+    v.data[_Y] = y;
+    v.data[_Z] = z;
+    v.data[_W] = w;
 
     return v;
 }
 
 void printVec(const Vec4 &v)
 {
-    std::cout << "[" << v.data[X] << ", " << v.data[Y] << ", " << v.data[Z] << ", " << v.data[W] << "]" << std::endl;
+    std::cout << "[" << v.data[_X] << ", " << v.data[_Y] << ", " << v.data[_Z] << ", " << v.data[_W] << "]" << std::endl;
 }
 
 Vec4 add(const Vec4 &vl, const Vec4 &vr)
 {
-    return makeVec(vl.data[X] + vr.data[X], vl.data[Y] + vr.data[Y], vl.data[Z] + vr.data[Z], vl.data[W] + vr.data[W]);
+    return makeVec(vl.data[_X] + vr.data[_X], vl.data[_Y] + vr.data[_Y], vl.data[_Z] + vr.data[_Z], vl.data[_W] + vr.data[_W]);
 }
 
 Vec4 sub(const Vec4 &vl, const Vec4 &vr)
 {
-    return makeVec(vl.data[X] - vr.data[X], vl.data[Y] - vr.data[Y], vl.data[Z] - vr.data[Z], vl.data[W] - vr.data[W]);
+    return makeVec(vl.data[_X] - vr.data[_X], vl.data[_Y] - vr.data[_Y], vl.data[_Z] - vr.data[_Z], vl.data[_W] - vr.data[_W]);
 }
 
 Vec4 neg(const Vec4 &v)
 {
-    return makeVec(-v.data[X], -v.data[Y], -v.data[Z], -v.data[W]);
+    return makeVec(-v.data[_X], -v.data[_Y], -v.data[_Z], -v.data[_W]);
 }
 
 Vec4 mulScal(const float &x, const Vec4 &v)
 {
-    return makeVec(v.data[X] * x, v.data[Y] * x, v.data[Z] * x, v.data[W] * x);
+    return makeVec(v.data[_X] * x, v.data[_Y] * x, v.data[_Z] * x, v.data[_W] * x);
 }
 
 Vec4 divScal(const float &x, const Vec4 &v)
 {
-    return makeVec(v.data[X] / x, v.data[Y] / x, v.data[Z] / x, v.data[W] / x);
+    return makeVec(v.data[_X] / x, v.data[_Y] / x, v.data[_Z] / x, v.data[_W] / x);
 }
 
 float dot(const Vec4 &vl, const Vec4 &vr)
 {
-    return vl.data[X] * vr.data[X] + vl.data[Y] * vr.data[Y] + vl.data[Z] * vr.data[Z] + vl.data[W] * vr.data[W];
+    return vl.data[_X] * vr.data[_X] + vl.data[_Y] * vr.data[_Y] + vl.data[_Z] * vr.data[_Z] + vl.data[_W] * vr.data[_W];
 }
 
 float length(const Vec4 &v)
@@ -224,12 +224,12 @@ float distance(const Vec4 &vl, const Vec4 &vr)
 
 bool equal(const Vec4 &vl, const Vec4 &vr)
 {
-    return floatEqual(vl.data[X], vr.data[X]) && floatEqual(vl.data[Y], vr.data[Y]) && floatEqual(vl.data[Z], vr.data[Z]) && floatEqual(vl.data[W], vr.data[W]);
+    return floatEqual(vl.data[_X], vr.data[_X]) && floatEqual(vl.data[_Y], vr.data[_Y]) && floatEqual(vl.data[_Z], vr.data[_Z]) && floatEqual(vl.data[_W], vr.data[_W]);
 }
 
 Vec3 wDiv(const Vec4 &v)
 {
-    return makeVec(v.data[X] / v.data[W], v.data[Y] / v.data[W], v.data[Z] / v.data[W]);
+    return makeVec(v.data[_X] / v.data[_W], v.data[_Y] / v.data[_W], v.data[_Z] / v.data[_W]);
 }
 
 // --------------- Matrix3 functions ---------------
@@ -250,15 +250,15 @@ Mat3 makeMatCols(const Vec3 &col0, const Vec3 &col1, const Vec3 &col2)
 {
     Mat3 res;
 
-    res.data[0] = col0.data[X];
-    res.data[3] = col0.data[Y];
-    res.data[6] = col0.data[Z];
-    res.data[1] = col1.data[X];
-    res.data[4] = col1.data[Y];
-    res.data[7] = col1.data[Z];
-    res.data[2] = col2.data[X];
-    res.data[5] = col2.data[Y];
-    res.data[8] = col2.data[Z];
+    res.data[0] = col0.data[_X];
+    res.data[3] = col0.data[_Y];
+    res.data[6] = col0.data[_Z];
+    res.data[1] = col1.data[_X];
+    res.data[4] = col1.data[_Y];
+    res.data[7] = col1.data[_Z];
+    res.data[2] = col2.data[_X];
+    res.data[5] = col2.data[_Y];
+    res.data[8] = col2.data[_Z];
 
     return res;
 }
@@ -267,15 +267,15 @@ Mat3 makeMatRows(const Vec3 &row0, const Vec3 &row1, const Vec3 &row2)
 {
     Mat3 res;
 
-    res.data[0] = row0.data[X];
-    res.data[1] = row0.data[Y];
-    res.data[2] = row0.data[Z];
-    res.data[3] = row1.data[X];
-    res.data[4] = row1.data[Y];
-    res.data[5] = row1.data[Z];
-    res.data[6] = row2.data[X];
-    res.data[7] = row2.data[Y];
-    res.data[8] = row2.data[Z];
+    res.data[0] = row0.data[_X];
+    res.data[1] = row0.data[_Y];
+    res.data[2] = row0.data[_Z];
+    res.data[3] = row1.data[_X];
+    res.data[4] = row1.data[_Y];
+    res.data[5] = row1.data[_Z];
+    res.data[6] = row2.data[_X];
+    res.data[7] = row2.data[_Y];
+    res.data[8] = row2.data[_Z];
 
     return res;
 }
@@ -666,7 +666,7 @@ Mat4 makeTranslationMatrix(const float &x, const float &y, const float &z)
 
 Mat4 makeTranslationMatrix(const Vec3 &v)
 {
-    return makeTranslationMatrix(v.data[X], v.data[Y], v.data[Z]);
+    return makeTranslationMatrix(v.data[_X], v.data[_Y], v.data[_Z]);
 }
 
 Mat4 makeTranslationMatrix(const float &x)
@@ -685,7 +685,7 @@ Mat4 makeScaleMatrix(const float &x, const float &y, const float &z)
 
 Mat4 makeScaleMatrix(const Vec3 &v)
 {
-    return makeScaleMatrix(v.data[X], v.data[Y], v.data[Z]);
+    return makeScaleMatrix(v.data[_X], v.data[_Y], v.data[_Z]);
 }
 
 Mat4 makeScaleMatrix(const float &x)
@@ -723,9 +723,9 @@ Mat4 makeRotationZ(const float &angle)
 Mat3 makeRotation(const Vec3 &axis, const float &angle)
 {
     return makeMatRows(
-        axis.data[X] * axis.data[X] * (1.0f - cos(angle)) + cos(angle), axis.data[X] * axis.data[Y] * (1.0f - cos(angle)) - axis.data[Z] * sin(angle), axis.data[X] * axis.data[Z] * (1.0f - cos(angle)) + axis.data[Y] * sin(angle),
-        axis.data[Y] * axis.data[X] * (1.0f - cos(angle)) + axis.data[Z] * sin(angle), axis.data[Y] * axis.data[Y] * (1.0f - cos(angle)) + cos(angle), axis.data[Y] * axis.data[Z] * (1.0f - cos(angle)) - axis.data[X] * sin(angle),
-        axis.data[Z] * axis.data[X] * (1.0f - cos(angle)) - axis.data[Y] * sin(angle), axis.data[Z] * axis.data[Y] * (1.0f - cos(angle)) + axis.data[X] * sin(angle), axis.data[Z] * axis.data[Z] * (1.0f - cos(angle)) + cos(angle));
+        axis.data[_X] * axis.data[_X] * (1.0f - cos(angle)) + cos(angle), axis.data[_X] * axis.data[_Y] * (1.0f - cos(angle)) - axis.data[_Z] * sin(angle), axis.data[_X] * axis.data[_Z] * (1.0f - cos(angle)) + axis.data[_Y] * sin(angle),
+        axis.data[_Y] * axis.data[_X] * (1.0f - cos(angle)) + axis.data[_Z] * sin(angle), axis.data[_Y] * axis.data[_Y] * (1.0f - cos(angle)) + cos(angle), axis.data[_Y] * axis.data[_Z] * (1.0f - cos(angle)) - axis.data[_X] * sin(angle),
+        axis.data[_Z] * axis.data[_X] * (1.0f - cos(angle)) - axis.data[_Y] * sin(angle), axis.data[_Z] * axis.data[_Y] * (1.0f - cos(angle)) + axis.data[_X] * sin(angle), axis.data[_Z] * axis.data[_Z] * (1.0f - cos(angle)) + cos(angle));
 }
 
 Mat4 makePerspective(const float &left, const float &right, const float &top, const float &bottom, const float &znear, const float &zfar)
@@ -752,9 +752,9 @@ Mat4 makeLookAt(const Vec3 &center, const Vec3 &lookAt, const Vec3 &up)
     Vec3 s = unitCross(f, up);
     Vec3 u = unitCross(s, f);
     Mat4 m = makeMatRows(
-        s.data[X], s.data[Y], s.data[Z], -(s.data[X] * center.data[X] + s.data[Y] * center.data[Y] + s.data[Z] * center.data[Z]),
-        u.data[X], u.data[Y], u.data[Z], -(u.data[X] * center.data[X] + u.data[Y] * center.data[Y] + u.data[Z] * center.data[Z]),
-        -f.data[X], -f.data[Y], -f.data[Z], (f.data[X] * center.data[X] + f.data[Y] * center.data[Y] + f.data[Z] * center.data[Z]),
+        s.data[_X], s.data[_Y], s.data[_Z], -(s.data[_X] * center.data[_X] + s.data[_Y] * center.data[_Y] + s.data[_Z] * center.data[_Z]),
+        u.data[_X], u.data[_Y], u.data[_Z], -(u.data[_X] * center.data[_X] + u.data[_Y] * center.data[_Y] + u.data[_Z] * center.data[_Z]),
+        -f.data[_X], -f.data[_Y], -f.data[_Z], (f.data[_X] * center.data[_X] + f.data[_Y] * center.data[_Y] + f.data[_Z] * center.data[_Z]),
         0.0f, 0.0f, 0.0f, 1.0f);
 
     return m;

@@ -1,7 +1,7 @@
 #ifndef __CAMERA_H_
 #define __CAMERA_H_
 
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 
 #define CAMERA_WIDTH 1280
 #define CAMERA_HEIGHT 720
@@ -22,8 +22,9 @@ typedef struct
 } CameraCalibration; // Defines all information for a camera calibration
 
 bool initializeCamera(CameraCalibration &cc, const std::vector<cv::Mat> &calibrationImages);
+void nextCamera(void);
 bool getNextFrame(cv::Mat &frame);
-void releaseCamera();
+void releaseCamera(void);
 
 // --------------- Camera Calibration Stuff ---------------
 bool startCameraCalibration(CameraCalibration &cc);

@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include <GL/glut.h>
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 #include <stdarg.h>
 
 #include "../../Header/Rendering3D/rendering3d.h"
@@ -145,7 +145,7 @@ void drawBall(void)
 
     glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
     glPushMatrix();
-    glTranslatef(playerTranslation.data[X] * cc.markerRealEdgeLength, playerTranslation.data[Y] * cc.markerRealEdgeLength, 0.0f);
+    glTranslatef(playerTranslation.data[_X] * cc.markerRealEdgeLength, playerTranslation.data[_Y] * cc.markerRealEdgeLength, 0.0f);
 
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, ballRadius);
@@ -221,7 +221,7 @@ void drawCar(void)
     GLfloat outerColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
     glPushMatrix();
-    glTranslatef(playerTranslation.data[X] * 0.5f, playerTranslation.data[Y] * 0.5f, 0.0f);
+    glTranslatef(playerTranslation.data[_X] * 0.5f, playerTranslation.data[_Y] * 0.5f, 0.0f);
     glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
 
     glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
@@ -412,6 +412,9 @@ void drawHelp(void)
 
     cv::Point p9(10, 190);
     cv::putText(bg, "t | z - Increase/decrease % of white pixels in marker id to be seen as white cell (1)", p9, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2, 8);
+
+    cv::Point p10(10, 210);
+    cv::putText(bg, "c - Get next webcam. If no webcam available, the first webcam will be loaded", p10, CV_FONT_HERSHEY_PLAIN, 1.0, cv::Scalar::all(0), 2, 8);
 }
 
 /**
@@ -446,8 +449,8 @@ void quitProgram(void)
  * @param key           Pressed key.
  * @param status        Pressed or released?
  * @param isSpecialKey  F1, F2, etc.
- * @param x             X-position of mouse at time when key pressed
- * @param y             Y-position of mouse at time when key pressed
+ * @param x             _X-position of mouse at time when key pressed
+ * @param y             _Y-position of mouse at time when key pressed
  */
 void handleKeyboardEvent(int key, int status, GLboolean isSpecialKey, int x, int y)
 {
@@ -473,21 +476,25 @@ void handleKeyboardEvent(int key, int status, GLboolean isSpecialKey, int x, int
             case 'Q':
                 quitProgram();
                 break;
+            case 'c':
+            case 'C':
+                nextCamera();
+                break;
             case 'w':
             case 'W':
-                playerTranslation.data[Y] += interval;
+                playerTranslation.data[_Y] += interval;
                 break;
             case 's':
             case 'S':
-                playerTranslation.data[Y] -= interval;
+                playerTranslation.data[_Y] -= interval;
                 break;
             case 'a':
             case 'A':
-                playerTranslation.data[X] += interval;
+                playerTranslation.data[_X] += interval;
                 break;
             case 'd':
             case 'D':
-                playerTranslation.data[X] -= interval;
+                playerTranslation.data[_X] -= interval;
                 break;
             case 'h':
             case 'H':
@@ -526,8 +533,8 @@ void handleKeyboardEvent(int key, int status, GLboolean isSpecialKey, int x, int
  * Keyboard-callback
  * 
  * @param key   Pressed key
- * @param x     X-position of mouse at time when key pressed
- * @param y     Y-position of mouse at time when key pressed
+ * @param x     _X-position of mouse at time when key pressed
+ * @param y     _Y-position of mouse at time when key pressed
  */
 void keyboardCallback(unsigned char key, int x, int y)
 {

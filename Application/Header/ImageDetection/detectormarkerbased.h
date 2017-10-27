@@ -1,7 +1,7 @@
 #ifndef __DETECTORMARKERBASED_H_
 #define __DETECTORMARKERBASED_H_
 
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 #include <map>
 #include <string>
 

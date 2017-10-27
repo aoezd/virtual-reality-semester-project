@@ -7,8 +7,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <opencv2/highgui.hpp>
-#include <opencv2/calib3d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 
 #include "../../Header/ImageDetection/camera.h"
 #include "../../Header/Logging/logger.h"
@@ -19,7 +19,8 @@
 
 const std::string LOGGING_NAME = "camera.cpp";
 
-cv::VideoCapture camera(0);
+int cameraIndex = 0;
+cv::VideoCapture camera;
 
 /**
  * Initilizes the camere and performs a camera calibration if necessary.
@@ -30,6 +31,7 @@ cv::VideoCapture camera(0);
  */
 bool initializeCamera(CameraCalibration &cc, const std::vector<cv::Mat> &calibrationImages)
 {
+	camera.open(cameraIndex);
     if (camera.isOpened())
     {
         camera.set(CV_CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH);
@@ -61,13 +63,23 @@ bool initializeCamera(CameraCalibration &cc, const std::vector<cv::Mat> &calibra
     return false;
 }
 
+void nextCamera(void) {
+	camera.open(++cameraIndex);
+	if (!camera.isOpened()) {
+		cameraIndex = 0;
+		camera.open(cameraIndex);
+	}
+	camera.set(CV_CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH);
+    camera.set(CV_CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT);
+}
+
 bool getNextFrame(cv::Mat &frame)
 {
     camera.read(frame);
     return !frame.empty();
 }
 
-void releaseCamera()
+void releaseCamera(void)
 {
     camera.release();
 }
