@@ -1,4 +1,4 @@
-# Virtual-Reality-Praktikum
+# Virtual Reality Semester Project
 
 ## Getting started
 
